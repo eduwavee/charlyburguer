@@ -11,6 +11,11 @@ El diseño sale de los flyers de Instagram de [@charlyburgerfama](https://www.in
   <img src="docs/celular-asistente.jpg" width="220" alt="Asistente de pedidos con el resumen final y el botón Enviar por WhatsApp">
 </p>
 
+<p align="center">
+  <img src="docs/foto-comanda.jpg" width="300" alt="Foto de la comanda que se comparte por WhatsApp (datos de ejemplo)"><br>
+  <sub>Foto de la comanda que el cliente comparte por WhatsApp (datos de ejemplo).</sub>
+</p>
+
 ---
 
 ## Qué hace
@@ -22,7 +27,8 @@ El diseño sale de los flyers de Instagram de [@charlyburgerfama](https://www.in
 | **Armador** | Un dibujo de la burger que suma o quita capas a medida que elegís. |
 | **Carrito** | Tiene forma de comanda de cocina. Se guarda en el teléfono aunque cierres la página. |
 | **Asistente de pedidos** | Te guía con botones o entiende texto simple (*"2 crunchy dobles"*, *"papas"*, *"terminar"*). Pregunta delivery o retiro, dirección, nombre y forma de pago, y si pagás en efectivo calcula el vuelto. |
-| **Envío por WhatsApp** | Abre WhatsApp con el pedido ya escrito: productos, cambios, total, entrega y pago. |
+| **Envío por WhatsApp** | Abre WhatsApp con el pedido ya escrito: productos, cambios, total, entrega y pago. Cada pedido lleva un código corto (por ejemplo, #4YVH). |
+| **Foto de la comanda** | Después de mandar el texto, el asistente arma una imagen de la comanda con el mismo código. En el celular se manda con el menú "Compartir" (se elige WhatsApp y el chat de Charly's); en la compu se copia para pegarla en WhatsApp Web o se descarga. WhatsApp no deja adjuntar imágenes desde un link, por eso va en un segundo paso. |
 | **Horario en vivo** | Muestra "Abierto ahora" o "Cerrado · abrimos…" según la hora de Tucumán. Si está cerrado, avisa, pero igual deja armar el pedido. |
 | **¿Lo de siempre?** | Repite el último pedido con un toque (se guarda en el teléfono del cliente). |
 
@@ -86,7 +92,7 @@ Si cambiás el modelo, regenerá también el póster (`img/cut/burger-3d-poster.
 
 ## Próxima etapa: pedido directo al WhatsApp del local
 
-Hoy el pedido se abre en el WhatsApp del cliente ya escrito, y el cliente toca "enviar". Para que entre solo al chat del local hace falta un pequeño servidor (o una función serverless) conectado a la **API de WhatsApp Business (Cloud API)**. En `assets/app.js`, la función `sendOrder()` es el único punto a reemplazar: ya recibe el pedido completo (productos, entrega, nombre y pago).
+Hoy el pedido se abre en el WhatsApp del cliente ya escrito, y el cliente toca "enviar" (y opcionalmente comparte la foto de la comanda). Para que entre solo al chat del local hace falta un pequeño servidor (o una función serverless) conectado a la **API de WhatsApp Business (Cloud API)**. En `assets/app.js`, la función `sendOrder()` es el único punto a reemplazar: ya recibe el pedido completo (productos, entrega, nombre y pago), y `drawComanda()` genera la imagen, que la API puede mandar como adjunto.
 
 ## Créditos
 

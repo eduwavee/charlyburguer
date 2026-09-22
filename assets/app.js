@@ -539,15 +539,17 @@
   }
 
   /* ------------------------------------------------------------ carrito (hoja) */
-  function ticket(inner) {
-    var when = '';
+  function nowLabel() {
     try {
-      when = new Intl.DateTimeFormat('es-AR', { timeZone: C.local.zonaHoraria, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+      return new Intl.DateTimeFormat('es-AR', { timeZone: C.local.zonaHoraria, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
         .format(new Date()).replace(',', ' ·');
-    } catch (e) { /* sin zona horaria */ }
+    } catch (e) { return ''; }
+  }
+
+  function ticket(inner, code) {
     return '<div class="ticket-wrap"><div class="comanda">' +
       '<div class="comanda-head"><img src="img/cut/logo-blue.png" alt="" width="348" height="137">' +
-        '<div><b>Comanda</b><span>' + esc(when) + ' · pedido web</span></div></div>' +
+        '<div><b>Comanda' + (code ? ' <em>#' + esc(code) + '</em>' : '') + '</b><span>' + esc(nowLabel()) + ' · pedido web</span></div></div>' +
       inner + '</div></div>';
   }
 
@@ -687,8 +689,11 @@
     list.forEach(function (r) {
       var el = document.createElement(r.href ? 'a' : 'button');
       el.className = 'reply' + (r.primary ? ' primary' : '') + (r.wa ? ' wa' : '');
-      if (r.href) { el.href = r.href; el.target = '_blank'; el.rel = 'noopener'; }
-      else el.type = 'button';
+      if (r.href) {
+        el.href = r.href;
+        if (r.download) el.setAttribute('download', r.download);
+        else { el.target = '_blank'; el.rel = 'noopener'; }
+      } else el.type = 'button';
       if (r.toggle) el.setAttribute('aria-pressed', r.pressed ? 'true' : 'false');
       el.innerHTML = (r.toggle ? icon('check', 'reply-check') : '') + (r.icon ? icon(r.icon) : '') + '<span>' + esc(r.label) + '</span>' + (r.sub ? ' <small>' + esc(r.sub) + '</small>' : '');
       el.addEventListener('click', function (e) {
@@ -696,6 +701,10 @@
           var on = el.getAttribute('aria-pressed') !== 'true';
           el.setAttribute('aria-pressed', on ? 'true' : 'false');
           r.onToggle(on, el);
+          return;
+        }
+        if (r.keep) {            // acción repetible: no cierra las respuestas
+          if (r.onPick) r.onPick(e);
           return;
         }
         var echo = r.echo !== undefined ? r.echo : r.label;
@@ -967,7 +976,7 @@
         '<div><b>Pago:</b> ' + esc(payLine(t.total)) + '</div></div>' +
         '<p class="comanda-foot">¡gracias por pedir!</p>';
     }
-    return ticket(h);
+    return ticket(h, meta ? o.codigo : null);
   }
 
   function sayTicket(intro, meta, after) {
@@ -993,6 +1002,7 @@
       botSay('Todavía no sumaste nada. ¿Arrancamos por una burger?');
       return mainMenu(false);
     }
+    if (!chat.order.codigo) chat.order.codigo = orderCode();
     sayTicket('Este es tu pedido hasta ahora:', false);
     askMode();
   }
@@ -1110,6 +1120,7 @@
     sayTicket('<strong>¡Listo!</strong> Revisá que esté todo bien:', true,
       !s.open ? '<p class="warn">Ahora estamos cerrados. Te respondemos apenas abramos, ' + esc(s.when) + ' a ' + laHora(C.horario.abre) + '.</p>' : '');
     var url = sendOrder(chat.order);
+    prepareComandaImage();
     ask([
       { label: 'Enviar por WhatsApp', icon: 'wa', wa: true, href: url, echo: null, onPick: sent },
       { label: 'Cambiar algo', onPick: askChange }
@@ -1137,7 +1148,7 @@
 
   function buildMessage(o) {
     var t = totals(o.modo), L = [];
-    L.push('¡Hola Charly\'s! Quiero hacer un pedido:');
+    L.push('¡Hola Charly\'s! Quiero hacer un pedido' + (o.codigo ? ' (#' + o.codigo + ')' : '') + ':');
     L.push('');
     cart.forEach(function (it) {
       L.push('• ' + it.qty + 'x ' + itemTitle(it) + ' — ' + money(unitPrice(it) * it.qty));
@@ -1170,12 +1181,240 @@
     cart = [];
     saveCart(false);
     renderRepeat();
+    var code = o.codigo, pending = chat.comandaImg;
+    o.codigo = null;
     botSay('¡Pedido armado! Se abrió WhatsApp con todo escrito: <strong>solo falta que toques enviar</strong>. Te confirmamos por ahí.');
     botSay('Si WhatsApp no se abrió, <a href="' + esc(url) + '" target="_blank" rel="noopener">tocá acá para abrirlo de nuevo</a>.');
-    ask([
+    var endReplies = [
       { label: 'Hacer otro pedido', onPick: function () { mainMenu(); } },
       { label: 'Cerrar', onPick: function () { closeSheet($('#chatSheet')); } }
-    ], { noFocus: true });
+    ];
+    if (!pending) return ask(endReplies, { noFocus: true });
+    var tok = chat.token;
+    pending.then(function (blob) {
+      if (tok !== chat.token) return;
+      offerComandaImage(blob, code, endReplies);
+    }, function () {
+      if (tok === chat.token) ask(endReplies, { noFocus: true });
+    });
+  }
+
+  /* --------- foto de la comanda
+     WhatsApp no deja adjuntar imágenes desde un link: la foto se manda con el menú
+     "Compartir" del teléfono (el cliente elige el chat de Charly's), o se copia o
+     descarga en la compu. */
+  function orderCode() {
+    var abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', out = '';
+    for (var i = 0; i < 4; i++) out += abc.charAt(Math.floor(Math.random() * abc.length));
+    return out;
+  }
+
+  function prepareComandaImage() {
+    chat.comandaImg = drawComanda(chat.order);
+    chat.comandaImg.catch(function () { /* sin foto, el pedido sigue igual */ });
+  }
+
+  function offerComandaImage(blob, code, endReplies) {
+    var name = 'comanda-charlys-' + code + '.png';
+    var url = URL.createObjectURL(blob);
+    var file = null, canShare = false;
+    try {
+      file = new File([blob], name, { type: 'image/png' });
+      canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+    } catch (e) { canShare = false; }
+    var canCopy = !!(navigator.clipboard && window.ClipboardItem);
+    botSay(function (m) {
+      m.classList.add('wide');
+      m.innerHTML = '<p>' + (canShare
+        ? 'Cuando vuelvas, mandá también <strong>la foto de la comanda</strong>: tocá el botón, elegí WhatsApp y el chat de Charly\'s.'
+        : 'También podés mandar <strong>la foto de la comanda</strong>: copiala y pegala en el chat de Charly\'s, o descargala.') + '</p>' +
+        '<img class="comanda-img" src="' + url + '" alt="Foto de la comanda del pedido #' + esc(code) + '">';
+      $('.comanda-img', m).addEventListener('load', scrollLog);
+    });
+    var list = [];
+    if (canShare) {
+      list.push({
+        label: 'Mandar foto de la comanda', icon: 'share', primary: true, keep: true,
+        onPick: function () {
+          navigator.share({ files: [file], title: 'Comanda #' + code, text: 'Comanda del pedido #' + code })
+            .then(function () { toast('¡Listo! Foto compartida'); })
+            .catch(function () { /* el cliente canceló */ });
+        }
+      });
+    }
+    if (canCopy) {
+      list.push({
+        label: 'Copiar foto', icon: 'copy', primary: !canShare, keep: true,
+        onPick: function () {
+          navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+            .then(function () { toast('Foto copiada: pegala en el chat de WhatsApp'); })
+            .catch(function () { toast('No se pudo copiar: probá con Descargar'); });
+        }
+      });
+    }
+    list.push({ label: 'Descargar foto', icon: 'download', href: url, download: name, keep: true });
+    ask(list.concat(endReplies), { noFocus: true });
+  }
+
+  function wrapText(ctx, text, first, rest) {
+    var words = String(text).split(/\s+/), lines = [], line = '';
+    words.forEach(function (w) {
+      var max = lines.length ? rest : first;
+      var test = line ? line + ' ' + w : w;
+      if (line && ctx.measureText(test).width > max) { lines.push(line); line = w; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function loadImage(src) {
+    return new Promise(function (res, rej) {
+      var im = new Image();
+      im.onload = function () { res(im); };
+      im.onerror = rej;
+      im.src = src;
+    });
+  }
+
+  function drawComanda(order) {
+    var FONT = {
+      title: '900 30px "League Spartan", sans-serif',
+      item: '900 21px "League Spartan", sans-serif',
+      total: '900 30px "League Spartan", sans-serif',
+      body: '400 16px Archivo, sans-serif',
+      bold: '800 16px Archivo, sans-serif',
+      small: '700 14px Archivo, sans-serif',
+      hand: '400 30px "Caveat Brush", cursive'
+    };
+    var INK = '#1E4C8F', BLUE = '#2A5FAE', MUTED = '#4A5F80';
+    var S = 2, W = 540, X0 = 26, X1 = W - 26, CX0 = X0 + 26, CX1 = X1 - 26, CW = CX1 - CX0, Z = 9;
+    var BAND = 18, TOP = BAND + 24;
+    var t = totals(order.modo);
+    var items = cart.map(function (it) { return { title: (it.qty + '× ' + itemTitle(it)).toUpperCase(), price: money(unitPrice(it) * it.qty), lines: itemLines(it) }; });
+    var meta = [['Entrega', order.modo === 'delivery' ? 'delivery' : 'retiro en el local']];
+    if (order.modo === 'delivery') {
+      meta.push(['Dirección', order.direccion || '']);
+      if (order.referencia) meta.push(['Referencia', order.referencia]);
+    }
+    meta.push(['Nombre', order.nombre || '']);
+    meta.push(['Pago', payLine(t.total)]);
+    var when = nowLabel();
+
+    var fontsReady = document.fonts && document.fonts.load
+      ? Promise.all(Object.keys(FONT).map(function (k) { return document.fonts.load(FONT[k]); })).catch(function () {})
+      : Promise.resolve();
+
+    function layout(m, logo) {
+      var ops = [], y = TOP + Z + 22;
+      var logoW = 118, logoH = Math.round(logoW * 137 / 348);
+      if (logo) ops.push({ img: logo, x: CX0, y: y, w: logoW, h: logoH });
+      else ops.push({ t: "Charly's", f: '900 26px "League Spartan", sans-serif', c: INK, x: CX0, y: y + 32 });
+      var hx = CX0 + logoW + 16;
+      ops.push({ t: 'COMANDA', f: FONT.title, c: INK, x: hx, y: y + 26 });
+      ops.push({ t: (when ? when + ' · ' : '') + 'pedido web', f: FONT.small, c: MUTED, x: hx, y: y + 47 });
+      if (order.codigo) ops.push({ t: '#' + order.codigo, f: FONT.item, c: BLUE, x: CX1, y: y + 26, a: 'right' });
+      y += logoH + 18;
+      var notchY = y;
+      ops.push({ dash: y }); y += 22;
+      items.forEach(function (it) {
+        m.font = FONT.item;
+        var pw = m.measureText(it.price).width;
+        var tl = wrapText(m, it.title, CW - pw - 16, CW - pw - 16);
+        tl.forEach(function (line, j) { ops.push({ t: line, f: FONT.item, c: INK, x: CX0, y: y + 18 + j * 25 }); });
+        ops.push({ t: it.price, f: FONT.item, c: INK, x: CX1, y: y + 18, a: 'right' });
+        y += 18 + (tl.length - 1) * 25 + 4;
+        m.font = FONT.body;
+        it.lines.forEach(function (l) {
+          wrapText(m, l, CW, CW).forEach(function (line) { y += 23; ops.push({ t: line, f: FONT.body, c: MUTED, x: CX0, y: y }); });
+        });
+        y += 18; ops.push({ dash: y, light: true }); y += 18;
+      });
+      if (order.modo === 'delivery') {
+        ops.push({ t: 'Subtotal', f: FONT.body, c: MUTED, x: CX0, y: y + 14 });
+        ops.push({ t: money(t.sub), f: FONT.body, c: MUTED, x: CX1, y: y + 14, a: 'right' });
+        y += 26;
+        ops.push({ t: 'Envío', f: FONT.body, c: MUTED, x: CX0, y: y + 14 });
+        ops.push({ t: money(t.envio), f: FONT.body, c: MUTED, x: CX1, y: y + 14, a: 'right' });
+        y += 30;
+      }
+      ops.push({ solid: y }); y += 12;
+      ops.push({ t: 'TOTAL', f: FONT.total, c: INK, x: CX0, y: y + 28 });
+      ops.push({ t: money(t.total), f: FONT.total, c: INK, x: CX1, y: y + 28, a: 'right' });
+      y += 46;
+      ops.push({ dash: y, light: true }); y += 8;
+      meta.forEach(function (row) {
+        m.font = FONT.bold;
+        var lw = m.measureText(row[0] + ': ').width;
+        m.font = FONT.body;
+        var lines = wrapText(m, row[1], CW - lw, CW);
+        y += 26;
+        ops.push({ t: row[0] + ':', f: FONT.bold, c: INK, x: CX0, y: y });
+        lines.forEach(function (line, j) {
+          if (j) y += 23;
+          ops.push({ t: line, f: FONT.body, c: INK, x: j ? CX0 : CX0 + lw, y: y });
+        });
+      });
+      y += 44;
+      ops.push({ t: '¡gracias por pedir!', f: FONT.hand, c: BLUE, x: W / 2, y: y, a: 'center' });
+      y += 24 + Z;
+      return { ops: ops, notchY: notchY, bottom: y };
+    }
+
+    function checker(c, y) {
+      var sq = 9;
+      c.fillStyle = '#fff'; c.fillRect(0, y, W, BAND);
+      c.fillStyle = BLUE;
+      for (var i = 0; i * sq < W; i++) for (var j = 0; j * sq < BAND; j++) if ((i + j) % 2 === 0) c.fillRect(i * sq, y + j * sq, sq, sq);
+    }
+
+    function render(logo) {
+      var m = document.createElement('canvas').getContext('2d');
+      var L = layout(m, logo);
+      var H = L.bottom + 24 + BAND;
+      var cv = document.createElement('canvas');
+      cv.width = W * S; cv.height = H * S;
+      var c = cv.getContext('2d');
+      c.scale(S, S);
+      c.fillStyle = BLUE; c.fillRect(0, 0, W, H);
+      checker(c, 0); checker(c, H - BAND);
+      // papel con borde dentado
+      c.save();
+      c.shadowColor = 'rgba(10,30,70,.35)'; c.shadowBlur = 24; c.shadowOffsetY = 10;
+      c.beginPath();
+      c.moveTo(X0, TOP + Z);
+      for (var x = X0; x < X1; x += 2 * Z) { c.lineTo(Math.min(x + Z, X1), TOP); c.lineTo(Math.min(x + 2 * Z, X1), TOP + Z); }
+      c.lineTo(X1, L.bottom - Z);
+      for (var x2 = X1; x2 > X0; x2 -= 2 * Z) { c.lineTo(Math.max(x2 - Z, X0), L.bottom); c.lineTo(Math.max(x2 - 2 * Z, X0), L.bottom - Z); }
+      c.closePath();
+      c.fillStyle = '#fff'; c.fill();
+      c.restore();
+      c.fillStyle = BLUE;
+      [X0, X1].forEach(function (nx) { c.beginPath(); c.arc(nx, L.notchY, 11, 0, Math.PI * 2); c.fill(); });
+      L.ops.forEach(function (op) {
+        if (op.img) c.drawImage(op.img, op.x, op.y, op.w, op.h);
+        else if (op.dash != null) {
+          c.save();
+          c.strokeStyle = op.light ? 'rgba(30,76,143,.28)' : 'rgba(30,76,143,.45)';
+          c.lineWidth = 2; c.setLineDash([7, 6]);
+          c.beginPath(); c.moveTo(CX0, op.dash); c.lineTo(CX1, op.dash); c.stroke();
+          c.restore();
+        } else if (op.solid != null) {
+          c.fillStyle = INK; c.fillRect(CX0, op.solid, CW, 3);
+        } else {
+          c.font = op.f; c.fillStyle = op.c; c.textAlign = op.a || 'left'; c.textBaseline = 'alphabetic';
+          c.fillText(op.t, op.x, op.y);
+        }
+      });
+      return new Promise(function (res, rej) {
+        try { cv.toBlob(function (b) { if (b) res(b); else rej(new Error('toBlob')); }, 'image/png'); }
+        catch (e) { rej(e); }   // lienzo "manchado" (por ejemplo, abriendo el archivo sin servidor)
+      });
+    }
+
+    return fontsReady
+      .then(function () { return loadImage('img/cut/logo-blue.png').catch(function () { return null; }); })
+      .then(function (logo) { return render(logo).catch(function () { return render(null); }); });
   }
 
   function repeatLast() {

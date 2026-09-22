@@ -625,6 +625,8 @@ fieldset.opt-group{border:0;padding:0;margin-inline:0;min-width:0;}
 .comanda-head::after{right:-29px;}
 .comanda-head img{width:78px;flex-shrink:0;}
 .comanda-head b{display:block;font-family:var(--font-display);font-weight:900;text-transform:uppercase;font-size:1.35rem;line-height:1;}
+.comanda-head em{font-style:normal;color:var(--blue);margin-left:.25em;}
+.comanda-img{display:block;width:100%;max-width:300px;margin-top:10px;border-radius:12px;box-shadow:0 10px 24px -14px rgba(20,54,101,.55);}
 .comanda-head span{display:block;margin-top:4px;font-size:.82rem;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
 .comanda-list{list-style:none;margin:0;padding:0;}
 .comanda-item{display:grid;grid-template-columns:1fr auto;gap:6px 14px;padding:14px 0;border-bottom:2px dashed var(--line);}
