@@ -1,0 +1,16 @@
+# Capturas y archivos de trabajo del proceso de diseño
+.impeccable/review/
+.impeccable/build/
+.impeccable/mocks/
+.impeccable/live/
+.impeccable/config.local.json
+
+# Respaldo local de la landing anterior
+index-original.html
+
+# Temporales
+_*.html
+*.glb.bak
+.DS_Store
+Thumbs.db
+node_modules/
