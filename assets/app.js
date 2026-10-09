@@ -135,6 +135,11 @@
   var CARNES = { simple: 1, doble: 2 };
   var sizeLabel = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
   var envioLabel = function () { return money(C.entrega.delivery.costo) + (C.entrega.delivery.confirmado ? '' : ' (a confirmar)'); };
+  /* Cuánto le falta al pedido para llegar al mínimo del delivery (0 si ya llega). */
+  var faltaMinimo = function () { return Math.max(0, (C.entrega.delivery.minimo || 0) - totals().sub); };
+  var minimoLabel = function () { return C.entrega.delivery.minimo ? 'mínimo de ' + money(C.entrega.delivery.minimo) : ''; };
+  /* "transferencia", "efectivo"… pero Mercado Pago va con mayúsculas. */
+  var pagoNombre = function (p) { return /^Mercado/.test(p.nombre) ? p.nombre : p.nombre.toLowerCase(); };
 
   function basePrice(p, tamano) {
     return p.tamanos ? p.tamanos[tamano || 'simple'] : p.precio;
@@ -399,7 +404,8 @@
       return '<article class="flyer" id="flyer-' + p.id + '">' +
         '<img class="flyer-brand" src="img/brand/wordmark-yellow.svg" alt="" width="950" height="425">' +
         '<h3><span class="visually-hidden">' + esc("Charly's ") + '</span><span class="fit">' + esc(p.flyer.titulo) + '</span></h3>' +
-        '<img class="flyer-img" src="' + p.flyer.foto + '" alt="' + esc(p.nombre + ': ' + p.descripcion) + '" width="1100" height="' + p.flyer.alto + '" loading="lazy" decoding="async">' +
+        '<button class="flyer-photo" type="button" data-customize="' + p.id + '" data-size="simple">' +
+          '<img class="flyer-img" src="' + p.flyer.foto + '" alt="' + esc(p.nombre + ': ' + p.descripcion) + '" width="1100" height="' + p.flyer.alto + '" loading="lazy" decoding="async"></button>' +
         '<div class="flyer-prices">' + sizeButtons(p, 'is-yellow') + '</div>' +
       '</article>';
     }).join('');
@@ -607,7 +613,7 @@
     body.innerHTML = '<h2 class="sheet-title" id="cartTitle">Tu pedido</h2>' +
       ticket(comandaItems(true) +
         '<div class="totals"><div class="grand"><span>Subtotal</span><span>' + money(t.sub) + '</span></div>' +
-        (C.entrega.delivery.activo ? '<div><span>Si es delivery</span><span>+' + envioLabel() + '</span></div>' : '') +
+        (C.entrega.delivery.activo ? '<div><span>Si es delivery' + (minimoLabel() ? ' <small>(' + minimoLabel() + ')</small>' : '') + '</span><span>+' + envioLabel() + '</span></div>' : '') +
         '</div>');
     foot.innerHTML = '<div class="cart-foot">' +
       '<button class="btn btn-blue btn-block" type="button" id="checkoutBtn"><span>Elegir entrega y pago</span><span>' + money(t.sub) + '</span></button>' +
@@ -1005,7 +1011,7 @@
     if (pago.id === 'efectivo') {
       return o.pagaCon && o.pagaCon > total ? 'efectivo, paga con ' + money(o.pagaCon) + ' (vuelto ' + money(o.pagaCon - total) + ')' : 'efectivo, paga justo';
     }
-    return pago.nombre.toLowerCase() + (pago.alias ? ' (alias ' + pago.alias + ')' : '');
+    return pagoNombre(pago) + (pago.alias ? ' (alias ' + pago.alias + ')' : '');
   }
 
   function checkout() {
@@ -1021,9 +1027,19 @@
   function askMode() {
     botSay('¿Te lo llevamos o lo retirás?');
     var list = [];
-    if (C.entrega.delivery.activo) list.push({ label: 'Delivery', sub: '+' + envioLabel(), icon: 'moto', onPick: function () { chat.order.modo = 'delivery'; askAddress(); } });
+    if (C.entrega.delivery.activo) list.push({ label: 'Delivery', sub: '+' + envioLabel(), icon: 'moto', onPick: function () {
+      if (faltaMinimo()) return belowMinimum();
+      chat.order.modo = 'delivery'; askAddress();
+    } });
     if (C.entrega.retiro.activo) list.push({ label: 'Take away', icon: 'store', onPick: function () { chat.order.modo = 'retiro'; askName(); } });
     list.push({ label: 'Cambiar el pedido', onPick: openCartFromChat });
+    ask(list);
+  }
+
+  function belowMinimum() {
+    botSay('El delivery tiene un pedido mínimo de <strong>' + money(C.entrega.delivery.minimo) + '</strong> (sin contar el envío). Te faltan <strong>' + money(faltaMinimo()) + '</strong>.');
+    var list = [{ label: 'Sumar algo más', primary: true, onPick: function () { mainMenu(false); } }];
+    if (C.entrega.retiro.activo) list.push({ label: 'Lo retiro (take away)', icon: 'store', onPick: function () { chat.order.modo = 'retiro'; askName(); } });
     ask(list);
   }
 
@@ -1091,7 +1107,8 @@
         onPick: function () {
           chat.order.pago = p.id;
           if (p.id === 'efectivo') return askCash();
-          if (p.alias) botSay('Alias: <strong>' + esc(p.alias) + '</strong>. Cuando te confirmemos el pedido por WhatsApp, mandá el comprobante por ahí.');
+          if (p.alias) botSay('Alias: <strong>' + esc(p.alias) + '</strong>' + (p.banco || p.titular ? ' (' + esc([p.banco, p.titular ? 'a nombre de ' + p.titular : ''].filter(Boolean).join(', ')) + ')' : '') +
+            '. Cuando te confirmemos el pedido por WhatsApp, mandá el comprobante por ahí.');
           review();
         }
       };
@@ -1127,6 +1144,7 @@
 
   function review() {
     if (!cart.length) { botSay('Tu pedido quedó vacío.'); return mainMenu(false); }
+    if (chat.order.modo === 'delivery' && faltaMinimo()) return belowMinimum();
     var s = openState();
     sayTicket('<strong>¡Listo!</strong> Revisá que esté todo bien:', true,
       !s.open ? '<p class="warn">Ahora estamos cerrados. Te respondemos apenas abramos, ' + esc(s.when) + ' a ' + laHora(s.abre) + '.</p>' : '');
@@ -1443,8 +1461,8 @@
     var o = chat.order;
     if (o.modo && o.nombre && o.pago && (o.modo === 'retiro' || o.direccion)) {
       var entrega = o.modo === 'delivery' ? 'delivery a ' + o.direccion : 'take away';
-      var pago = (C.pagos.filter(function (p) { return p.id === o.pago; })[0] || {}).nombre || '';
-      botSay('¿Igual que la otra vez? <strong>' + esc(entrega) + '</strong>, a nombre de ' + esc(o.nombre) + ', pago con ' + esc(pago.toLowerCase()) + '.');
+      var pagoSel = C.pagos.filter(function (p) { return p.id === o.pago; })[0], pago = pagoSel ? pagoNombre(pagoSel) : '';
+      botSay('¿Igual que la otra vez? <strong>' + esc(entrega) + '</strong>, a nombre de ' + esc(o.nombre) + ', pago con ' + esc(pago) + '.');
       ask([
         { label: 'Sí, igual', primary: true, onPick: function () { if (o.pago === 'efectivo') askCash(); else review(); } },
         { label: 'Cambiar datos', onPick: askMode },
@@ -1488,11 +1506,14 @@
       return restoreReplies();
     }
     if (/delivery|envio|envian|llevan/.test(t)) {
-      botSay('Sí, hacemos delivery en Famaillá. El envío es de ' + esc(envioLabel()) + ' y lo elegís al terminar el pedido.');
+      botSay('Sí, hacemos delivery en Famaillá. El envío es de ' + esc(envioLabel()) + (minimoLabel() ? ', con un pedido ' + minimoLabel() : '') + ', y lo elegís al terminar el pedido.');
       return restoreReplies();
     }
     if (/pago|pagar|transfer|mercado|efectivo|alias|tarjeta/.test(t)) {
-      botSay('Podés pagar con ' + C.pagos.map(function (p) { return p.nombre.toLowerCase(); }).join(', ').replace(/, ([^,]*)$/, ' o $1') + '. Lo elegís al final.');
+      var cuenta = C.pagos.filter(function (p) { return p.alias; })[0];
+      botSay('Podés pagar con ' + C.pagos.map(pagoNombre).join(', ').replace(/, ([^,]*)$/, ' o $1') + '.' +
+        (cuenta ? ' Alias <strong>' + esc(cuenta.alias) + '</strong>' + (cuenta.banco ? ' (' + esc(cuenta.banco) + (cuenta.titular ? ', a nombre de ' + esc(cuenta.titular) : '') + ')' : '') + '.' : '') +
+        ' Lo elegís al final.');
       return restoreReplies();
     }
     if (/termin|finaliz|confirm|listo|enviar|nada mas|eso es todo|es todo/.test(t)) return checkout();

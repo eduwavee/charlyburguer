@@ -24,7 +24,7 @@ El diseño es la identidad nueva de [@charlyburgerfama](https://www.instagram.co
 | | |
 |---|---|
 | **Burger 3D y mascota** | En el inicio, el gato de Charly's presenta un modelo 3D que gira solo y se puede girar con el dedo. Mientras carga se ve una foto fija. Si el teléfono tiene ahorro de datos, se queda con la foto. |
-| **Flyers** | Queso, BBQ y Crunchy como en Instagram, con sus fotos y los precios simple y doble listos para tocar. |
+| **Flyers** | Queso, BBQ y Crunchy como en Instagram, con sus fotos y los precios simple y doble listos para tocar. Tocar la foto abre el armador en simple. |
 | **Carta** | La carta del local con sus precios: hamburguesas (simple o doble), lomitos, porciones de papas y agregados. Cada caja de precio es un botón: abre el armador con ese tamaño elegido. |
 | **Armador** | Un dibujo de la burger o del lomo que suma o quita capas a medida que sumás agregados (carne y cheddar, huevo, cheddar en las papas, papas extra) o sacás ingredientes. |
 | **Carrito** | Tiene forma de comanda de cocina. Se guarda en el teléfono aunque cierres la página. |
@@ -69,8 +69,8 @@ Después abrí <http://localhost:8000>.
 
 ## Antes de publicar ✅
 
-1. **Pagos:** reemplazá los alias de ejemplo de transferencia y Mercado Pago (`pagos`).
-2. **Precios, envío y horarios:** están cargados según la carta y la historia de horarios de octubre 2026; el delivery cuesta $500. Si cambian, se editan en `menu.js` (`productos`, `agregados`, `entrega.delivery.costo` y `horario`).
+1. **Pagos:** transferencia y Mercado Pago van al alias `charlyburgerfama` (Naranja X, a nombre de Damian Hector Leal). Si cambia, se edita en `menu.js` (`pagos`).
+2. **Precios, envío y horarios:** están cargados según la carta y la historia de horarios de octubre 2026. El delivery cuesta $500, con un pedido mínimo de $7.500 sin contar el envío. Si cambian, se editan en `menu.js` (`productos`, `agregados`, `entrega.delivery.costo`, `entrega.delivery.minimo` y `horario`).
 3. **WhatsApp:** si cambia el número, editá `local.whatsapp` en `menu.js` y los links de `index.html` (buscá `5493813690561`).
 
 ## Publicar

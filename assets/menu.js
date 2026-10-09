@@ -5,7 +5,6 @@
    productos, agregados, costo de envío, alias de pago u horario.
 
    Precios tomados de la carta de Charly's (octubre 2026).
-   Lo marcado "// EJEMPLO" todavía es provisorio: alias de pago.
    ===================================================================== */
 window.CHARLYS = {
   local: {
@@ -31,14 +30,16 @@ window.CHARLYS = {
   },
 
   entrega: {
-    delivery: { activo: true, costo: 500, confirmado: true },     // costo fijo del envío
+    delivery: { activo: true, costo: 500, confirmado: true,       // costo fijo del envío
+                minimo: 7500 },                                    // pedido mínimo para delivery (sin contar el envío)
     retiro: { activo: true }
   },
 
   pagos: [
     { id: 'efectivo', nombre: 'Efectivo', detalle: 'Te llevamos el vuelto' },
-    { id: 'transferencia', nombre: 'Transferencia', alias: 'charlys.burger.ej' },  // EJEMPLO: alias
-    { id: 'mercadopago', nombre: 'Mercado Pago', alias: 'charlys.mp.ej' }          // EJEMPLO: alias
+    /* Una sola cuenta (Naranja X): se le puede transferir desde cualquier banco o desde Mercado Pago. */
+    { id: 'transferencia', nombre: 'Transferencia', alias: 'charlyburgerfama', titular: 'Damian Hector Leal', banco: 'Naranja X' },
+    { id: 'mercadopago', nombre: 'Mercado Pago', alias: 'charlyburgerfama', titular: 'Damian Hector Leal', banco: 'Naranja X' }
   ],
 
   /* Agregados que se suman al armar una burger o un lomo.
