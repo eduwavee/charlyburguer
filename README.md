@@ -69,10 +69,9 @@ Después abrí <http://localhost:8000>.
 
 ## Antes de publicar ✅
 
-1. **Envío:** poné el costo real del delivery en `assets/menu.js` (`entrega.delivery.costo`) y cambiá `confirmado` a `true`; así desaparece el "(a confirmar)".
-2. **Pagos:** reemplazá los alias de ejemplo de transferencia y Mercado Pago (`pagos`).
-3. **Precios y horarios:** están cargados según la carta y la historia de horarios de octubre 2026. Si cambian, se editan en `menu.js` (`productos`, `agregados` y `horario`).
-4. **WhatsApp:** si cambia el número, editá `local.whatsapp` en `menu.js` y los links de `index.html` (buscá `5493813690561`).
+1. **Pagos:** reemplazá los alias de ejemplo de transferencia y Mercado Pago (`pagos`).
+2. **Precios, envío y horarios:** están cargados según la carta y la historia de horarios de octubre 2026; el delivery cuesta $500. Si cambian, se editan en `menu.js` (`productos`, `agregados`, `entrega.delivery.costo` y `horario`).
+3. **WhatsApp:** si cambia el número, editá `local.whatsapp` en `menu.js` y los links de `index.html` (buscá `5493813690561`).
 
 ## Publicar
 

@@ -942,7 +942,9 @@
     expect({
       placeholder: 'Escribí la cantidad', numeric: true, label: 'Cantidad',
       onText: function (v) {
-        var n = parseInt(v.replace(/\D/g, ''), 10);
+        var n = parseInt(v.replace(/\D/g, ''), 10) ||
+          ['', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'].indexOf(norm(v).trim().replace(/^una?$/, 'un')) || 0;
+        if (n < 1 && /[a-z]{3}/i.test(v)) return interpret(v);   // escribió otra cosa ("terminar", "hacen delivery?"): no lo dejamos trabado
         if (!n || n < 1 || n > 20) { botSay('Decime un número del 1 al 20.'); return askQty(); }
         chat.draft.qty = n;
         addFromChat();

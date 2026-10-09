@@ -324,18 +324,18 @@ button.price-box.is-yellow:hover{--pb-bg:#fff;}
 .cat-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:3px solid var(--cobalt);padding-bottom:8px;margin-bottom:6px;}
 .cat-title{
   font-family:var(--font);font-weight:900;font-stretch:115%;letter-spacing:-.01em;
-  font-size:clamp(2rem, 9vw, 3.1rem);line-height:.95;color:var(--cobalt);
+  font-size:clamp(1.6rem, 11vw - .55rem, 3.1rem);line-height:.95;color:var(--cobalt);
 }
 .size-head{display:none;}
 .cat-note{margin:12px 0 4px;color:var(--ink-muted);font-size:.95rem;max-width:44ch;}
 
 .board{list-style:none;margin:0;padding:0;}
-.item{display:grid;gap:10px;padding:18px 0;border-bottom:2px dotted var(--line-strong);}
+.item{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:18px 0;border-bottom:2px dotted var(--line-strong);}
 .item:last-child{border-bottom:0;}
 .item h4{font-family:var(--font-carta);font-weight:400;font-size:1.6rem;line-height:1.05;letter-spacing:.005em;color:var(--cobalt);}
 .item-desc{margin-top:4px;color:var(--ink-muted);font-size:.95rem;line-height:1.4;max-width:42ch;}
 .item-prices{display:flex;gap:8px;}
-.item-prices .price-box{flex:1;justify-content:space-between;padding-inline:.9rem;}
+.item-prices .price-box{flex:1;min-width:0;justify-content:space-between;padding-inline:.9rem;}
 .item-prices .price-box small{opacity:.8;}
 
 .board.is-compact .item{grid-template-columns:1fr auto;align-items:center;padding:12px 0;gap:14px;}
@@ -600,7 +600,15 @@ fieldset.opt-group{border:0;padding:0;margin-inline:0;min-width:0;}
 .note-field:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px var(--soft);}
 
 .foot-row{display:flex;align-items:center;gap:12px;}
-.foot-row .btn{flex:1;justify-content:space-between;padding-inline:1.2rem;}
+.foot-row .btn{flex:1;min-width:0;justify-content:space-between;padding-inline:1.2rem;}
+/* celulares angostos (iPhone SE, Android chicos): que entren cantidad y botón sin cortarse */
+@media (max-width:379px){
+  .sheet-foot{padding-inline:14px;}
+  .foot-row{gap:8px;}
+  .foot-row .stepper button{width:36px;}
+  .foot-row .btn{padding-inline:.7rem;gap:.35rem;font-size:.95rem;letter-spacing:.01em;}
+  .item-prices .price-box{padding-inline:.6rem;}
+}
 .stepper{display:inline-flex;align-items:center;border:2px solid var(--line-strong);border-radius:6px;flex-shrink:0;background:#fff;}
 .stepper button{display:grid;place-items:center;width:44px;height:48px;border:0;background:transparent;color:var(--cobalt);border-radius:4px;}
 .stepper button:hover{background:var(--mist);}

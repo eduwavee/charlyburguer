@@ -37,7 +37,7 @@ Burgers con pan de papa, lomitos y papas, armados al momento en Famaillá. Todo 
 - Porciones de papas, potes de salsa y Pepsi como productos sueltos.
 - Toda la carta, precios, extras, costo de envío, alias y número viven en un único archivo de configuración editable.
 - **Pendiente (segunda etapa):** que el pedido entre automáticamente al chat de WhatsApp del local (API de WhatsApp Business / integración tipo MCP). El envío está aislado en una sola función para poder reemplazarlo.
-- **Precios:** los de la carta impresa de octubre 2026 (burgers, lomitos, papas y agregados). Siguen pendientes el costo real del delivery (se muestra "a confirmar") y los alias de transferencia y Mercado Pago.
+- **Precios:** los de la carta impresa de octubre 2026 (burgers, lomitos, papas y agregados). El delivery cuesta $500. Siguen pendientes los alias de transferencia y Mercado Pago.
 
 ## Brand Commitments
 

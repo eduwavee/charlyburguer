@@ -5,8 +5,7 @@
    productos, agregados, costo de envío, alias de pago u horario.
 
    Precios tomados de la carta de Charly's (octubre 2026).
-   Lo marcado "// EJEMPLO" todavía es provisorio: costo del delivery
-   y alias de pago.
+   Lo marcado "// EJEMPLO" todavía es provisorio: alias de pago.
    ===================================================================== */
 window.CHARLYS = {
   local: {
@@ -32,7 +31,7 @@ window.CHARLYS = {
   },
 
   entrega: {
-    delivery: { activo: true, costo: 1500, confirmado: false },   // EJEMPLO: costo fijo del envío
+    delivery: { activo: true, costo: 500, confirmado: true },     // costo fijo del envío
     retiro: { activo: true }
   },
 
