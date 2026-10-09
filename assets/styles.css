@@ -501,13 +501,13 @@ dialog.sheet::backdrop{background:rgba(8,31,85,.6);-webkit-backdrop-filter:blur(
 @keyframes sheetDown{from{transform:translateY(0);}to{transform:translateY(100%);}}
 .sheet-grip{width:44px;height:5px;border-radius:5px;background:var(--line-strong);margin:10px auto 0;flex-shrink:0;}
 .sheet-close{position:absolute;top:10px;right:10px;z-index:3;background:#fff;}
-.sheet-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:10px 20px 24px;}
+.sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 20px 24px;}
 .sheet-foot{flex-shrink:0;padding:12px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff;}
 .sheet-foot:empty{display:none;}
 .sheet-title{font-family:var(--font-carta);font-weight:400;font-size:clamp(2rem,9vw,2.6rem);line-height:1;padding-right:48px;}
 .sheet-sub{margin-top:8px;color:var(--ink-muted);}
 #cartSheet{background:var(--mist);}
-#cartSheet .sheet-close{background:transparent;}
+#cartSheet .sheet-close{background:var(--mist);}   /* tapa la comanda cuando pasa por debajo al bajar */
 @media (min-width:760px){
   dialog.sheet{inset:0;margin:auto;max-height:min(88dvh,860px);border-radius:12px;}
   dialog.sheet[open]{animation:popIn .4s var(--ease-out);}
@@ -615,6 +615,14 @@ fieldset.opt-group{border:0;padding:0;margin-inline:0;min-width:0;}
   .foot-row .stepper button{width:36px;}
   .foot-row .btn{padding-inline:.7rem;gap:.35rem;font-size:.95rem;letter-spacing:.01em;}
   .item-prices .price-box{padding-inline:.6rem;}
+  .cart-foot .btn{padding-inline:.8rem;font-size:.92rem;letter-spacing:.01em;}
+  .comanda-actions .link-btn{padding-inline:.4rem;}
+  .comanda-actions .link-btn .ico{display:none;}   /* sin íconos entran cantidad, Cambiar y Quitar en una fila */
+  #cartSheet .sheet-body{padding-inline:12px;}
+  .comanda{padding-inline:12px;}
+  .comanda-head::before{left:-23px;}
+  .comanda-head::after{right:-23px;}
+  .stepper.is-small button{width:34px;}
 }
 .stepper{display:inline-flex;align-items:center;border:2px solid var(--line-strong);border-radius:6px;flex-shrink:0;background:#fff;}
 .stepper button{display:grid;place-items:center;width:44px;height:48px;border:0;background:transparent;color:var(--cobalt);border-radius:4px;}
@@ -654,7 +662,7 @@ fieldset.opt-group{border:0;padding:0;margin-inline:0;min-width:0;}
 .comanda-item .qty{color:var(--cobalt);background:var(--mist);padding:0 .2em;border-radius:3px;}
 .comanda-lines{grid-column:1/-1;list-style:none;margin:0;padding:0;color:var(--ink-muted);font-size:.93rem;}
 .comanda-price{font-family:var(--font-carta);font-size:1.3rem;font-variant-numeric:tabular-nums;text-align:right;}
-.comanda-actions{grid-column:1/-1;display:flex;align-items:center;gap:6px;margin-top:6px;}
+.comanda-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;}
 .comanda-actions .spacer{flex:1;}
 .link-btn{display:inline-flex;align-items:center;gap:.35rem;min-height:40px;padding:0 .6rem;border:0;border-radius:4px;background:transparent;color:var(--cobalt);font-weight:700;font-size:.92rem;}
 .link-btn:hover{background:var(--mist);}
@@ -674,6 +682,7 @@ fieldset.opt-group{border:0;padding:0;margin-inline:0;min-width:0;}
 .empty .btns{display:grid;gap:10px;max-width:340px;margin-inline:auto;}
 .cart-foot{display:grid;gap:10px;}
 .cart-foot .btn-blue{justify-content:space-between;}
+.cart-foot .btn{min-width:0;}
 
 /* ------------------------------------------------------------ chat */
 dialog.chat{max-width:none;height:100dvh;max-height:100dvh;border-radius:0;inset:0;background:var(--mist);}
