@@ -5,10 +5,11 @@ Sitio web móvil de **Charly's**, hamburguesería y sandwichería de Famaillá (
 El diseño es la identidad nueva de [@charlyburgerfama](https://www.instagram.com/charlyburgerfama/) (octubre 2026): el logo con la burger, el gato mascota, los flyers cobalto con el nombre en amarillo y la carta blanca con cuadrillé y precios en cajas azules.
 
 <p align="center">
-  <img src="docs/celular-inicio.jpg" width="220" alt="Inicio en el celular: burger 3D, titular y botón Armá tu pedido">
-  <img src="docs/celular-armador.jpg" width="220" alt="Armador de burger: la pila dibujada crece con cada extra">
-  <img src="docs/celular-comanda.jpg" width="220" alt="Carrito con forma de comanda">
-  <img src="docs/celular-asistente.jpg" width="220" alt="Asistente de pedidos con el resumen final y el botón Enviar por WhatsApp">
+  <img src="docs/celular-inicio.jpg" width="190" alt="Inicio en el celular: el gato de Charly's, la burger 3D y el botón Armá tu pedido">
+  <img src="docs/celular-carta.jpg" width="190" alt="La carta: cada caja de precio arma esa burger en simple o doble">
+  <img src="docs/celular-armador.jpg" width="190" alt="Armador: la pila dibujada crece con cada agregado">
+  <img src="docs/celular-comanda.jpg" width="190" alt="Carrito con forma de comanda">
+  <img src="docs/celular-asistente.jpg" width="190" alt="Asistente de pedidos con el resumen final y el botón Enviar por WhatsApp">
 </p>
 
 <p align="center">
@@ -41,7 +42,7 @@ assets/
   menu.js               ⭐ carta, precios, agregados, envío, pagos, horarios por día y WhatsApp (lo único que hay que editar)
   app.js                carrito, armador, asistente, horario y envío del pedido
   styles.css            estilos (colores de marca en :root)
-  fonts/                tipografías alojadas en el sitio (Archivo, Anton, Lilita One, Pacifico)
+  fonts/                tipografías alojadas en el sitio (Archivo, Lilita One, Pacifico)
   3d/burger.glb         modelo 3D optimizado (1,7 MB)
 img/
   brand/                logo, gato, papas y lettering vectorizados de la marca (SVG), íconos del sitio

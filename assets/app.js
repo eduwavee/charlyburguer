@@ -398,7 +398,7 @@
     $('#flyerRail').innerHTML = C.productos.filter(function (p) { return p.flyer; }).map(function (p) {
       return '<article class="flyer" id="flyer-' + p.id + '">' +
         '<img class="flyer-brand" src="img/brand/wordmark-yellow.svg" alt="" width="950" height="425">' +
-        '<h3><span class="visually-hidden">' + esc("Charly's ") + '</span>' + esc(p.flyer.titulo) + '</h3>' +
+        '<h3><span class="visually-hidden">' + esc("Charly's ") + '</span><span class="fit">' + esc(p.flyer.titulo) + '</span></h3>' +
         '<img class="flyer-img" src="' + p.flyer.foto + '" alt="' + esc(p.nombre + ': ' + p.descripcion) + '" width="1100" height="' + p.flyer.alto + '" loading="lazy" decoding="async">' +
         '<div class="flyer-prices">' + sizeButtons(p, 'is-yellow') + '</div>' +
       '</article>';
@@ -407,7 +407,7 @@
     ['burgers', 'lomitos', 'papas'].forEach(function (cat) {
       $('.board[data-cat="' + cat + '"]').innerHTML = byCat(cat).map(function (p) {
         return '<li class="item" id="item-' + p.id + '">' +
-          '<div><h4>' + esc(p.nombre) + (p.destaque ? '<span class="item-tag">' + esc(p.destaque) + '</span>' : '') + '</h4>' +
+          '<div><h4>' + esc(p.nombre) + '</h4>' +
             (p.descripcion ? '<p class="item-desc">' + esc(p.descripcion) + '</p>' : '') + '</div>' +
           '<div class="item-prices">' + sizeButtons(p) + '</div>' +
         '</li>';
@@ -416,12 +416,22 @@
 
     $('.board[data-cat="agregados"]').innerHTML =
       C.agregados.map(function (x) {
-        return '<li class="item is-builder"><h4>' + esc(x.nombre) + '<span class="item-sub">al armar tu burger o lomo</span></h4>' +
+        return '<li class="item is-builder"><h4>' + esc(x.nombre) + '</h4>' +
           '<span class="item-static">' + money(x.precio) + '</span></li>';
       }).join('') +
       byCat('sueltos').map(function (p) {
         return '<li class="item"><h4>' + esc(p.nombre) + '</h4><div class="item-prices">' + sizeButtons(p) + '</div></li>';
       }).join('');
+  }
+
+  /* Los nombres de los flyers van de borde a borde, como en los flyers impresos. */
+  function fitFlyerNames() {
+    $$('.flyer h3 .fit').forEach(function (el) {
+      var box = el.parentNode.clientWidth;
+      if (!box) return;
+      el.style.fontSize = '100px';
+      el.style.fontSize = Math.min(100 * box / el.scrollWidth, box * 0.36) + 'px';
+    });
   }
 
   /* ------------------------------------------------------------ armador (hoja) */
@@ -1580,8 +1590,6 @@
         pbr.setMetallicFactor(0);       // es comida, no metal
         pbr.setRoughnessFactor(0.85);
       } catch (e) { /* modelo sin materiales editables */ }
-      var note = $('#heroNote');
-      if (note) note.firstChild.nodeValue = '¡girala!';
     });
     var conn = navigator.connection || {};
     var lightData = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
@@ -1604,6 +1612,9 @@
 
   /* ------------------------------------------------------------ inicio */
   renderMenu();
+  fitFlyerNames();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFlyerNames);
+  if ('ResizeObserver' in window) new ResizeObserver(fitFlyerNames).observe($('#flyerRail'));
   renderStatus();
   renderCartUI(false);
   renderRepeat();

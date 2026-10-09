@@ -149,8 +149,7 @@ window.CHARLYS = {
       precio: 14000, pan: 'lomo',
       capas: ['salsa', 'lomo', 'jamon', 'tybo', 'lomo', 'jamon', 'tybo', 'huevo', 'huevo'],
       quitar: [{ id: 'huevo', nombre: 'huevo' }, { id: 'jamon', nombre: 'jamón' }, { id: 'salsa', nombre: 'salsa especial' }],
-      extras: ['huevo', 'cheddar-papas', 'papas-extra'],
-      destaque: 'El más completo'
+      extras: ['huevo', 'cheddar-papas', 'papas-extra']
     },
 
     /* Porciones de papas */

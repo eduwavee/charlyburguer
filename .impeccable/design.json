@@ -1,177 +1,455 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-22T20:30:00-03:00",
+  "generatedAt": "2026-10-08T12:00:00-03:00",
   "title": "Design System: Charly's",
   "extensions": {
     "colorMeta": {
-      "blue": { "role": "primary", "displayName": "Azul Charly's", "canonical": "#2A5FAE", "tonalRamp": ["#0E2446", "#143665", "#1E4C8F", "#2A5FAE", "#5A83C4", "#A6BFE2", "#DCE6F4", "#EEF2F8"] },
-      "blue-ink": { "role": "primary", "displayName": "Tinta Azul", "canonical": "#1E4C8F", "tonalRamp": ["#0E2446", "#143665", "#1E4C8F", "#2A5FAE", "#5A83C4", "#A6BFE2", "#DCE6F4", "#EEF2F8"] },
-      "blue-deep": { "role": "primary", "displayName": "Azul Profundo", "canonical": "#143665", "tonalRamp": ["#0E2446", "#143665", "#1E4C8F", "#2A5FAE", "#5A83C4", "#A6BFE2", "#DCE6F4", "#EEF2F8"] },
-      "blue-soft": { "role": "neutral", "displayName": "Azul Lavado", "canonical": "#DCE6F4", "tonalRamp": ["#0E2446", "#143665", "#1E4C8F", "#2A5FAE", "#5A83C4", "#A6BFE2", "#DCE6F4", "#EEF2F8"] },
-      "blue-mist": { "role": "neutral", "displayName": "Niebla Azul", "canonical": "#EEF2F8", "tonalRamp": ["#0E2446", "#143665", "#1E4C8F", "#2A5FAE", "#5A83C4", "#A6BFE2", "#DCE6F4", "#EEF2F8"] },
-      "paper": { "role": "neutral", "displayName": "Papel", "canonical": "#FFFFFF", "tonalRamp": ["#1A2233", "#3A465C", "#5E6B82", "#8A96AA", "#B7C0CF", "#DCE2EB", "#EEF2F8", "#FFFFFF"] },
-      "on-blue-soft": { "role": "neutral", "displayName": "Papel sobre Azul", "canonical": "#D6E3F7", "tonalRamp": ["#0E2446", "#143665", "#1E4C8F", "#2A5FAE", "#5A83C4", "#A6BFE2", "#D6E3F7", "#EEF2F8"] },
-      "ink-muted": { "role": "neutral", "displayName": "Tinta Apagada", "canonical": "#4A5F80", "tonalRamp": ["#1F2A3B", "#33445F", "#4A5F80", "#6A7C98", "#8E9DB3", "#B4C0D0", "#D9E0EA", "#F0F3F7"] },
-      "line": { "role": "neutral", "displayName": "Línea", "canonical": "rgba(30,76,143,.22)" },
-      "line-strong": { "role": "neutral", "displayName": "Línea Fuerte", "canonical": "rgba(30,76,143,.4)" }
+      "cobalt": {
+        "role": "primary",
+        "displayName": "Flyer Cobalt",
+        "canonical": "#1446A9",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "cobalt-deep": {
+        "role": "primary",
+        "displayName": "Back-Room Cobalt",
+        "canonical": "#0C2F7A",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "cobalt-night": {
+        "role": "primary",
+        "displayName": "Night Cobalt",
+        "canonical": "#081F55",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "yellow": {
+        "role": "secondary",
+        "displayName": "Flyer Yellow",
+        "canonical": "#FEB905",
+        "tonalRamp": [
+          "#3D2C00",
+          "#6B4D00",
+          "#A67800",
+          "#F0A800",
+          "#FEB905",
+          "#FFCD4D",
+          "#FFE299",
+          "#FFF5D6"
+        ]
+      },
+      "yellow-deep": {
+        "role": "secondary",
+        "displayName": "Toasted Yellow",
+        "canonical": "#F0A800",
+        "tonalRamp": [
+          "#3D2C00",
+          "#6B4D00",
+          "#A67800",
+          "#F0A800",
+          "#FEB905",
+          "#FFCD4D",
+          "#FFE299",
+          "#FFF5D6"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Carta Paper",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Cobalt Mist",
+        "canonical": "#EEF3FC",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Cobalt Soft",
+        "canonical": "#D6E2F8",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "on-cobalt-soft": {
+        "role": "neutral",
+        "displayName": "On-Cobalt Soft",
+        "canonical": "#D3E0F8",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#3A5794",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "rgba(20,70,169,.2)",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "rgba(20,70,169,.42)",
+        "tonalRamp": [
+          "#061A47",
+          "#081F55",
+          "#0C2F7A",
+          "#1446A9",
+          "#3E68C0",
+          "#7E9BD8",
+          "#BCCDEF",
+          "#EEF3FC"
+        ]
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Solo el titular del hero. League Spartan 900 en mayúsculas." },
-      "headline": { "displayName": "Headline", "purpose": "Títulos de sección y nombre del plato destacado." },
-      "title": { "displayName": "Title", "purpose": "Nombres de platos y títulos de hoja." },
-      "title-sm": { "displayName": "Title chico", "purpose": "Comanda, leyendas de opciones, total, cabecera del chat." },
-      "body": { "displayName": "Body", "purpose": "Descripciones y bajadas; 46 a 60ch." },
-      "label": { "displayName": "Label", "purpose": "Botones, pestañas, dock y carrito; mayúsculas, ancho 88%." },
-      "price": { "displayName": "Price", "purpose": "Precios sobre pincel; Archivo itálica 900, ancho 80%, cifras tabulares." },
-      "banner": { "displayName": "Banner", "purpose": "Rótulos sobre pincel de banner; Archivo itálica 900, ancho 80%, mayúsculas." },
-      "hand": { "displayName": "Hand", "purpose": "Notas cortas a mano con flecha; nunca en botones ni títulos." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero H1 only, mobile: Archivo 900 at font-stretch 78%, uppercase yellow on cobalt."
+      },
+      "display-desktop": {
+        "displayName": "Display Desktop",
+        "purpose": "Hero H1 at 900px+: font-stretch 64%; 6.6rem is the deliberate flyer-poster ceiling."
+      },
+      "flyer-name": {
+        "displayName": "Flyer Name",
+        "purpose": "Flyer product names, font-stretch 78%, sized by fitFlyerNames() to fill the panel edge to edge."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Carta section heads and 'Como pedir', font-stretch 115%, over a 3px cobalt rule."
+      },
+      "day-name": {
+        "displayName": "Day Name",
+        "purpose": "Horario day names, font-stretch 118%, uppercase."
+      },
+      "time-bar": {
+        "displayName": "Time Bar",
+        "purpose": "Hours inside yellow time bars, font-stretch 75%, tabular."
+      },
+      "sheet-title": {
+        "displayName": "Sheet Title",
+        "purpose": "Builder product name and cart title in sheets."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Carta item names, comanda items, option legends, tabs."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Every price, counter, stepper value and total; tabular figures."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text and descriptions (ink-muted, 42-46ch)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Buttons, nav, cart button, dock: Archivo 800, font-stretch 90%, uppercase."
+      },
+      "script": {
+        "displayName": "Script",
+        "purpose": "Short hand notes only (a few words), rotated slightly."
+      }
     },
     "shadows": [
-      { "name": "shadow-soft", "value": "0 10px 28px -16px rgba(20,54,101,.35)", "purpose": "Hover de botones." },
-      { "name": "shadow-lift", "value": "0 18px 40px -18px rgba(20,54,101,.45)", "purpose": "Aviso flotante (toast)." },
-      { "name": "food", "value": "drop-shadow(0 16px 12px rgba(20,54,101,.28))", "purpose": "Recortes de comida sobre su escenario (filter)." },
-      { "name": "food-feature", "value": "drop-shadow(0 26px 22px rgba(10,30,70,.5))", "purpose": "Recorte del plato destacado sobre campo azul (filter)." },
-      { "name": "seal", "value": "0 14px 26px -12px rgba(10,30,70,.6)", "purpose": "Sellos pegados sobre el flyer." },
-      { "name": "ticket", "value": "drop-shadow(0 12px 16px rgba(20,54,101,.16))", "purpose": "Comanda dentada (filter, sigue el borde)." },
-      { "name": "sheet", "value": "0 -20px 60px -20px rgba(10,30,70,.5)", "purpose": "Hojas inferiores." },
-      { "name": "dock", "value": "0 18px 40px -14px rgba(10,30,70,.65)", "purpose": "Botón del dock en celular." },
-      { "name": "info-card", "value": "0 28px 50px -26px rgba(5,20,50,.6)", "purpose": "Tarjeta de información sobre campo azul." }
+      {
+        "name": "soft-lift",
+        "value": "0 10px 26px -14px rgba(8,31,85,.45)",
+        "purpose": "Hover on buttons and price boxes with translateY(-2px)."
+      },
+      {
+        "name": "lift",
+        "value": "0 18px 40px -18px rgba(8,31,85,.55)",
+        "purpose": "Toast."
+      },
+      {
+        "name": "floating-panel",
+        "value": "0 -20px 60px -20px rgba(8,31,85,.6)",
+        "purpose": "Bottom sheets and chat drawer (dock uses 0 18px 40px -14px rgba(8,31,85,.7))."
+      },
+      {
+        "name": "cutout-drop",
+        "value": "drop-shadow(0 18px 14px rgba(8,31,85,.55))",
+        "purpose": "filter on flyer photos; hero cat uses 0 14px 14px rgba(8,31,85,.45)."
+      },
+      {
+        "name": "ticket",
+        "value": "drop-shadow(0 12px 16px rgba(8,31,85,.18))",
+        "purpose": "filter on the comanda ticket."
+      }
     ],
     "motion": [
-      { "name": "ease-out", "value": "cubic-bezier(.16,1,.3,1)", "purpose": "Curva por defecto: botones, hojas, dock, toast, burbujas, tarjetas." },
-      { "name": "ease-expo", "value": "cubic-bezier(.19,1,.22,1)", "purpose": "Entradas del hero (caída de la burger, sello), rebote del contador, check de opciones." },
-      { "name": "ease-drop", "value": "cubic-bezier(.34,1.5,.64,1)", "purpose": "Solo la caída de capas en la pila del armador (0.6s). Único rebote del sistema." },
-      { "name": "state", "value": "0.2s", "purpose": "Cambios de color, borde y elevación en hover." },
-      { "name": "sheet-in", "value": "0.45s ease-out / 0.24s ease-in", "purpose": "Hoja sube / baja; dock entra en 0.45s." },
-      { "name": "reduced-motion", "value": "animation y transition a 0.001ms; auto-rotate del modelo 3D quitado", "purpose": "prefers-reduced-motion: reduce anula todo movimiento." }
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Default for state changes, sheets, dock, toast."
+      },
+      {
+        "name": "ease-expo",
+        "value": "cubic-bezier(.19,1,.22,1)",
+        "purpose": "Entrances: hero burger drop, cat in, counter bump, check tick."
+      },
+      {
+        "name": "ease-drop",
+        "value": "cubic-bezier(.34,1.5,.64,1)",
+        "purpose": "Builder stack layer drop only (.6s); the single overshoot in the system."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition .001ms",
+        "purpose": "prefers-reduced-motion collapses all motion."
+      }
     ],
     "breakpoints": [
-      { "name": "chat-compact", "value": "max-width: 460px" },
-      { "name": "md", "value": "760px" },
-      { "name": "lg", "value": "900px" }
+      {
+        "name": "chat-compact",
+        "value": "max-width 460px"
+      },
+      {
+        "name": "md",
+        "value": "760px"
+      },
+      {
+        "name": "lg",
+        "value": "900px"
+      },
+      {
+        "name": "carta-2col",
+        "value": "1100px"
+      }
     ]
   },
   "components": [
     {
-      "name": "Botón primario azul",
+      "name": "Price Box",
       "kind": "button",
-      "refersTo": "button-primary",
-      "description": "Acción principal sobre papel: campo azul, mayúsculas 800 condensadas.",
-      "html": "<button class=\"ds-btn ds-btn-blue\">Armala</button>",
-      "css": ".ds-btn { display:inline-flex; align-items:center; justify-content:center; gap:.55rem; min-height:52px; padding:0 1.35rem; border-radius:14px; background:var(--blue); color:#fff; border:2px solid var(--blue); font-family:var(--font); font-weight:800; font-stretch:88%; font-size:1.05rem; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; transition:transform .2s var(--ease-out), box-shadow .2s var(--ease-out), background-color .2s ease; } .ds-btn-blue:hover { background:var(--blue-ink); border-color:var(--blue-ink); transform:translateY(-2px); box-shadow:var(--shadow-soft); } .ds-btn:active { transform:scale(.97); box-shadow:none; } .ds-btn:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }"
+      "refersTo": "price-box",
+      "description": "Solid cobalt carta price; the button that opens the builder at that size.",
+      "html": "<button class=\"ds-price\" type=\"button\"><small>Simple</small>$8.500</button>",
+      "css": ".ds-price{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;padding:.3rem .8rem .2rem;border:0;border-radius:4px;background:var(--cobalt);color:#fff;font-family:var(--font-carta);font-size:1.4rem;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s cubic-bezier(.16,1,.3,1),background-color .2s ease}.ds-price small{font-family:var(--font);font-size:.72rem;font-weight:800;font-stretch:90%;text-transform:uppercase;letter-spacing:.06em;opacity:.85}.ds-price:hover{background:var(--cobalt-deep);transform:translateY(-2px);box-shadow:0 10px 26px -14px rgba(8,31,85,.45)}.ds-price:active{transform:scale(.97);box-shadow:none}.ds-price:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}"
     },
     {
-      "name": "Botones sobre campo azul",
+      "name": "Price Box Yellow",
       "kind": "button",
-      "refersTo": "button-light",
-      "description": "Claro (primaria) y fantasma claro (secundaria) dentro de campos azules.",
-      "html": "<div class=\"ds-field\"><button class=\"ds-btn-l\">Armá tu pedido</button> <a class=\"ds-btn-gl\" href=\"#\">Ver la carta</a></div>",
-      "css": ".ds-field { display:flex; gap:10px; padding:24px; background:var(--blue); } .ds-btn-l, .ds-btn-gl { display:inline-flex; align-items:center; min-height:52px; padding:0 1.35rem; border-radius:14px; font-family:var(--font); font-weight:800; font-stretch:88%; font-size:1.05rem; text-transform:uppercase; letter-spacing:.02em; text-decoration:none; cursor:pointer; transition:transform .2s var(--ease-out), box-shadow .2s var(--ease-out), background-color .2s ease; } .ds-btn-l { background:#fff; color:var(--blue-ink); border:2px solid #fff; } .ds-btn-l:hover { transform:translateY(-2px); box-shadow:var(--shadow-soft); } .ds-btn-gl { background:transparent; color:#fff; border:2px solid rgba(255,255,255,.75); } .ds-btn-gl:hover { background:rgba(255,255,255,.12); border-color:#fff; } .ds-btn-l:focus-visible, .ds-btn-gl:focus-visible { outline:3px solid #fff; outline-offset:3px; }"
+      "refersTo": "price-box-yellow",
+      "description": "Flyer and builder variant on cobalt fields.",
+      "html": "<div class=\"ds-field\"><button class=\"ds-price-y\" type=\"button\"><small>Doble</small>$9.500</button></div>",
+      "css": ".ds-field{background:var(--cobalt);padding:16px}.ds-price-y{display:inline-flex;flex-direction:column;align-items:center;gap:2px;min-height:48px;padding:.45rem .9rem .4rem;border:0;border-radius:4px;background:var(--yellow);color:var(--cobalt-night);font-family:var(--font-carta);font-size:1.5rem;line-height:1;font-variant-numeric:tabular-nums;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),background-color .2s ease}.ds-price-y small{font-family:var(--font);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ds-price-y:hover{background:#fff;transform:translateY(-2px)}.ds-price-y:focus-visible{outline:3px solid #fff;outline-offset:3px}"
     },
     {
-      "name": "Precio sobre pincel",
-      "kind": "custom",
-      "refersTo": "price-tag",
-      "description": "Precio en Archivo itálica 900 condensada sobre el trazo de pincel de los flyers, girado -4°.",
-      "html": "<span class=\"ds-price\"><small>Simple</small><b>$7.200</b></span> <span class=\"ds-price ds-price-white\"><b>$8.999</b></span>",
-      "css": ".ds-price { display:inline-flex; flex-direction:column; align-items:flex-start; padding:.62em 1.15em .72em .95em; color:#fff; background:url(\"img/brush/precio-blue.png\") center/100% 100% no-repeat; font-family:var(--font); font-style:italic; font-weight:900; font-stretch:80%; line-height:.88; transform:rotate(-4deg); font-variant-numeric:tabular-nums; white-space:nowrap; } .ds-price small { font-size:.78rem; font-weight:800; font-stretch:90%; text-transform:uppercase; letter-spacing:.05em; } .ds-price b { font-size:2.05rem; } .ds-price-white { background:url(\"img/brush/precio-white.png\") center/100% 100% no-repeat; color:var(--blue-ink); }"
+      "name": "Button Primary",
+      "kind": "button",
+      "refersTo": "button-blue",
+      "description": "Primary action on paper.",
+      "html": "<button class=\"ds-btn\" type=\"button\">Armá tu pedido</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;min-height:52px;padding:0 1.35rem;border-radius:6px;border:2px solid var(--cobalt);background:var(--cobalt);color:#fff;font-family:var(--font);font-weight:800;font-stretch:90%;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s,background-color .2s}.ds-btn:hover{background:var(--cobalt-deep);border-color:var(--cobalt-deep);transform:translateY(-2px);box-shadow:0 10px 26px -14px rgba(8,31,85,.45)}.ds-btn:active{transform:scale(.97);box-shadow:none}.ds-btn:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}"
     },
     {
-      "name": "Banner de pincel",
-      "kind": "custom",
-      "refersTo": "banner-label",
-      "description": "Rótulo en mayúsculas sobre el trazo de banner, girado -2.5°.",
-      "html": "<span class=\"ds-banner\">Burgers</span>",
-      "css": ".ds-banner { display:inline-block; padding:.42em .9em .5em .7em; background:url(\"img/brush/banner-blue.png\") center/100% 100% no-repeat; color:#fff; font-family:var(--font); font-style:italic; font-weight:900; font-stretch:80%; font-size:2.4rem; text-transform:uppercase; letter-spacing:.01em; line-height:1; transform:rotate(-2.5deg); }"
+      "name": "Button Yellow",
+      "kind": "button",
+      "refersTo": "button-yellow",
+      "description": "Primary action on cobalt fields.",
+      "html": "<div class=\"ds-field\"><button class=\"ds-btn-y\" type=\"button\">Armá tu pedido</button></div>",
+      "css": ".ds-field{background:var(--cobalt);padding:16px}.ds-btn-y{display:inline-flex;align-items:center;min-height:52px;padding:0 1.35rem;border-radius:6px;border:2px solid var(--yellow);background:var(--yellow);color:var(--cobalt-night);font-family:var(--font);font-weight:800;font-stretch:90%;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),background-color .2s}.ds-btn-y:hover{background:#fff;border-color:#fff;transform:translateY(-2px)}.ds-btn-y:focus-visible{outline:3px solid #fff;outline-offset:3px}"
     },
     {
-      "name": "Sello",
-      "kind": "custom",
-      "refersTo": "seal",
-      "description": "Sello circular papel con anillo interior punteado, girado 10°.",
-      "html": "<div class=\"ds-seal\"><b>100%</b><span>sabor<br>casero</span></div>",
-      "css": ".ds-seal { position:relative; width:96px; height:96px; border-radius:50%; background:#fff; color:var(--blue-ink); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:var(--font); font-style:italic; font-weight:900; font-stretch:82%; text-transform:uppercase; line-height:.92; transform:rotate(10deg); box-shadow:0 14px 26px -12px rgba(10,30,70,.6); } .ds-seal::before { content:\"\"; position:absolute; inset:5px; border-radius:50%; border:2px dashed var(--blue); opacity:.7; } .ds-seal b { font-size:1.75rem; } .ds-seal span { font-size:.76rem; letter-spacing:.02em; }"
+      "name": "Button Ghost",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action on paper.",
+      "html": "<button class=\"ds-ghost\" type=\"button\">Ver la carta</button>",
+      "css": ".ds-ghost{display:inline-flex;align-items:center;min-height:52px;padding:0 1.35rem;border-radius:6px;border:2px solid var(--line-strong);background:transparent;color:var(--cobalt);font-family:var(--font);font-weight:800;font-stretch:90%;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem;cursor:pointer;transition:background-color .2s,border-color .2s}.ds-ghost:hover{background:var(--mist);border-color:var(--cobalt)}.ds-ghost:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}"
     },
     {
-      "name": "Comanda",
-      "kind": "card",
-      "refersTo": "comanda",
-      "description": "Ticket de cocina con bordes dentados y muescas; forma del carrito y de los resúmenes.",
-      "html": "<div class=\"ds-bg\"><div class=\"ds-wrap\"><div class=\"ds-comanda\"><div class=\"ds-head\"><div><b>Comanda</b><span>22/09 · 21:40 · pedido web</span></div></div><div class=\"ds-item\"><h3><span class=\"ds-qty\">2×</span> Crunchy doble</h3><span class=\"ds-p\">$14.400</span><p>Sin cebolla · Extra panceta</p></div><div class=\"ds-grand\"><span>Subtotal</span><span>$14.400</span></div><p class=\"ds-foot\">¡gracias por pedir!</p></div></div></div>",
-      "css": ".ds-bg { background:var(--blue-mist); padding:20px; } .ds-wrap { filter:drop-shadow(0 12px 16px rgba(20,54,101,.16)); } .ds-comanda { --z:8px; background:#fff; color:var(--blue-ink); font-family:var(--font); padding:calc(var(--z) + 16px) 18px calc(var(--z) + 18px); -webkit-mask:conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/calc(2*var(--z)) var(--z) repeat-x, conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(2*var(--z)) var(--z) repeat-x, linear-gradient(#000 0 0) center/100% calc(100% - 2*var(--z) + 2px) no-repeat; mask:conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/calc(2*var(--z)) var(--z) repeat-x, conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(2*var(--z)) var(--z) repeat-x, linear-gradient(#000 0 0) center/100% calc(100% - 2*var(--z) + 2px) no-repeat; } .ds-head { position:relative; padding-bottom:14px; border-bottom:2px dashed var(--line-strong); } .ds-head::before, .ds-head::after { content:\"\"; position:absolute; bottom:-12px; width:22px; height:22px; border-radius:50%; background:var(--blue-mist); } .ds-head::before { left:-29px; } .ds-head::after { right:-29px; } .ds-head b { display:block; font-family:var(--font-display); font-weight:900; text-transform:uppercase; font-size:1.35rem; line-height:1; } .ds-head span { display:block; margin-top:4px; font-size:.82rem; font-weight:700; color:var(--ink-muted); font-variant-numeric:tabular-nums; } .ds-item { display:grid; grid-template-columns:1fr auto; gap:6px 14px; padding:14px 0; border-bottom:2px dashed var(--line); } .ds-item h3 { margin:0; font-family:var(--font-display); font-weight:900; text-transform:uppercase; font-size:1.2rem; line-height:1.05; } .ds-qty { color:var(--blue); } .ds-item p { grid-column:1/-1; margin:0; color:var(--ink-muted); font-size:.93rem; } .ds-p { font-weight:900; font-stretch:82%; font-size:1.2rem; font-variant-numeric:tabular-nums; } .ds-grand { display:flex; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:3px solid var(--blue-ink); font-family:var(--font-display); font-weight:900; font-size:1.5rem; text-transform:uppercase; line-height:1; } .ds-foot { margin:14px 0 0; text-align:center; font-family:var(--font-hand); font-size:1.25rem; color:var(--blue); }"
-    },
-    {
-      "name": "Pila del armador",
-      "kind": "custom",
-      "refersTo": "builder-stack",
-      "description": "Burger dibujada en línea que suma capas con caída y rebote (ease-drop); único rebote del sistema.",
-      "html": "<div class=\"ds-stage\"><div class=\"ds-stack\"><span class=\"ds-layer\"><svg viewBox=\"0 0 200 36\"><path class=\"ds-ink ds-paper\" d=\"M10 5h180c3 0 5 3 4 6-5 14-19 20-40 20H46C25 31 11 25 6 11c-1-3 1-6 4-6Z\"/></svg></span><span class=\"ds-layer\"><svg viewBox=\"0 0 200 28\"><path class=\"ds-ink ds-blue\" d=\"M12 6c18-4 38-1 58-3s40 2 60 0 40-1 58 3c6 2 7 12 1 15-18 5-38 2-58 4s-40-2-60 0-40 1-58-3c-7-2-7-14-1-16Z\"/></svg></span><span class=\"ds-layer ds-in\"><svg viewBox=\"0 0 200 22\"><path class=\"ds-ink ds-soft\" d=\"M8 4h184l-3 7h-26l-4 7c-1.5 2.5-4.5 2.5-6 0l-4-7H74l-3 5c-1.5 2.5-4.5 2.5-6 0l-3-5H11Z\"/></svg></span><span class=\"ds-layer ds-in\"><svg viewBox=\"0 0 200 72\"><path class=\"ds-ink ds-paper\" d=\"M10 66C8 33 48 6 100 6s92 27 90 60c0 2.5-2 4-4.5 4h-171C12 70 10 68.5 10 66Z\"/></svg></span></div></div>",
-      "css": ".ds-stage { position:relative; display:flex; justify-content:center; align-items:flex-end; min-height:220px; padding:40px 20px 38px; background:var(--blue-mist); } .ds-stage::after { content:\"\"; position:absolute; left:0; right:0; bottom:0; height:20px; background:repeating-conic-gradient(var(--blue) 0 25%, #fff 0 50%) 0 0/20px 20px; } .ds-stack { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; width:190px; margin-bottom:-6px; } .ds-layer { display:block; width:100%; } .ds-layer + .ds-layer { margin-top:-5px; } .ds-layer svg { display:block; width:100%; height:auto; overflow:visible; } .ds-in { animation:ds-drop .6s var(--ease-drop) both; } .ds-stack .ds-layer:nth-child(1) { order:4; } .ds-stack .ds-layer:nth-child(2) { order:3; } .ds-stack .ds-layer:nth-child(3) { order:2; } .ds-stack .ds-layer:nth-child(4) { order:1; } .ds-ink { stroke:var(--blue-ink); stroke-width:3; stroke-linejoin:round; stroke-linecap:round; } .ds-paper { fill:#fff; } .ds-soft { fill:var(--blue-soft); } .ds-blue { fill:var(--blue); } @keyframes ds-drop { 0% { transform:translateY(-70px) rotate(-3deg); opacity:0; } 50% { opacity:1; } 100% { transform:none; opacity:1; } } @media (prefers-reduced-motion: reduce) { .ds-in { animation:none; } }"
-    },
-    {
-      "name": "Chat: burbujas y respuestas",
-      "kind": "chip",
-      "refersTo": "reply-chip",
-      "description": "Burbuja del bot en papel, del usuario en azul; respuestas en píldora con variante primaria, WhatsApp y alternable con check.",
-      "html": "<div class=\"ds-chat\"><p class=\"ds-msg ds-bot\">¿Lo retirás o te lo llevamos?</p><p class=\"ds-msg ds-user\">Delivery</p><div class=\"ds-replies\"><button class=\"ds-reply ds-primary\">Retiro en el local</button><button class=\"ds-reply\" aria-pressed=\"true\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>Papas</button><button class=\"ds-reply ds-wa\">Enviar por WhatsApp</button></div></div>",
-      "css": ".ds-chat { display:flex; flex-direction:column; gap:10px; padding:20px 14px; background:var(--blue-mist); font-family:var(--font); } .ds-msg { max-width:86%; margin:0; padding:11px 15px; border-radius:20px; line-height:1.45; } .ds-bot { align-self:flex-start; background:#fff; color:var(--blue-ink); border-bottom-left-radius:6px; box-shadow:0 4px 14px -10px rgba(20,54,101,.5); } .ds-user { align-self:flex-end; background:var(--blue); color:#fff; border-bottom-right-radius:6px; } .ds-replies { display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; background:#fff; } .ds-reply { display:inline-flex; align-items:center; gap:.45rem; min-height:44px; padding:0 1rem; border-radius:999px; border:2px solid var(--blue); background:#fff; color:var(--blue-ink); font:inherit; font-weight:800; font-size:.95rem; cursor:pointer; transition:background-color .2s ease, color .2s ease; } .ds-reply:hover { background:var(--blue-mist); } .ds-reply:focus-visible { outline:3px solid var(--blue); outline-offset:3px; } .ds-primary { background:var(--blue); color:#fff; } .ds-primary:hover { background:var(--blue-ink); border-color:var(--blue-ink); } .ds-wa { background:var(--blue-deep); border-color:var(--blue-deep); color:#fff; } .ds-reply[aria-pressed=\"true\"] { background:var(--blue-soft); } .ds-ico { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }"
-    },
-    {
-      "name": "Campo de texto",
-      "kind": "input",
-      "refersTo": "input-field",
-      "description": "Campo papel con borde línea fuerte; foco con borde azul y anillo azul lavado.",
-      "html": "<input class=\"ds-input\" placeholder=\"Escribí tu nombre\">",
-      "css": ".ds-input { min-height:48px; padding:0 16px; border-radius:14px; border:2px solid var(--line-strong); background:#fff; color:var(--blue-ink); font-family:var(--font); font-size:1rem; } .ds-input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }"
-    },
-    {
-      "name": "Barra de estado y dock",
+      "name": "Carta Tabs",
       "kind": "nav",
-      "refersTo": "status-bar",
-      "description": "Barra de estado en vivo arriba y botón de dock (solo celular) abajo, ambos en azul profundo.",
-      "html": "<div class=\"ds-status\"><span class=\"ds-dot\"></span>Abierto hasta la 01:30</div><button class=\"ds-dock\"><span class=\"ds-count\">3</span><span class=\"ds-label\">Ver pedido</span><span class=\"ds-total\">$21.600</span></button>",
-      "css": ".ds-status { display:flex; align-items:center; justify-content:center; gap:.55rem; min-height:34px; padding:6px 16px; background:var(--blue-deep); color:#fff; font-family:var(--font); font-size:.85rem; font-weight:700; } .ds-dot { width:9px; height:9px; border-radius:50%; border:2px solid #fff; background:#fff; animation:ds-pulse 2.2s var(--ease-out) infinite; } @keyframes ds-pulse { 0% { box-shadow:0 0 0 0 rgba(255,255,255,.55); } 80%, 100% { box-shadow:0 0 0 9px rgba(255,255,255,0); } } .ds-dock { display:flex; align-items:center; gap:12px; width:100%; max-width:520px; margin:16px auto 0; min-height:60px; padding:0 18px 0 12px; border-radius:18px; border:0; background:var(--blue-deep); color:#fff; box-shadow:0 18px 40px -14px rgba(10,30,70,.65); font-family:var(--font); font-weight:800; font-stretch:88%; text-transform:uppercase; letter-spacing:.02em; font-size:1.05rem; cursor:pointer; transition:background-color .2s ease; } .ds-dock:hover { background:var(--blue-ink); } .ds-dock:focus-visible { outline:3px solid var(--blue); outline-offset:3px; } .ds-count { display:inline-grid; place-items:center; min-width:36px; height:36px; padding:0 8px; border-radius:10px; background:#fff; color:var(--blue-ink); font-stretch:100%; font-variant-numeric:tabular-nums; } .ds-label { flex:1; text-align:left; } .ds-total { font-variant-numeric:tabular-nums; font-stretch:85%; font-size:1.15rem; } @media (prefers-reduced-motion: reduce) { .ds-dot { animation:none; } }"
+      "refersTo": "tab",
+      "description": "Sticky section tabs of the carta.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"ds-tab\" href=\"#\">Hamburguesas</a><a class=\"ds-tab is-on\" href=\"#\">Lomitos</a><a class=\"ds-tab\" href=\"#\">Papas</a></nav>",
+      "css": ".ds-tabs{display:flex;gap:8px}.ds-tab{display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;border-radius:4px;border:2px solid var(--line-strong);color:var(--cobalt);text-decoration:none;font-family:var(--font-carta);font-size:1.05rem;transition:background-color .2s,border-color .2s}.ds-tab:hover{border-color:var(--cobalt)}.ds-tab.is-on{background:var(--cobalt);border-color:var(--cobalt);color:#fff}.ds-tab:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}"
+    },
+    {
+      "name": "Removal Chip",
+      "kind": "chip",
+      "refersTo": "chip-remove",
+      "description": "Builder 'Sacale' toggle; checked strikes the ingredient.",
+      "html": "<label class=\"ds-chip\"><input type=\"checkbox\" checked><span>Cebolla</span></label> <label class=\"ds-chip\"><input type=\"checkbox\"><span>Tomate</span></label>",
+      "css": ".ds-chip{position:relative;display:inline-block}.ds-chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}.ds-chip span{display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;border-radius:999px;border:2px solid var(--line-strong);color:var(--cobalt);font-family:var(--font);font-weight:700;transition:background-color .2s,border-color .2s}.ds-chip:hover span{border-color:var(--cobalt)}.ds-chip input:checked+span{background:var(--cobalt);border-color:var(--cobalt);color:#fff;text-decoration:line-through;text-decoration-thickness:2px}.ds-chip input:focus-visible+span{outline:3px solid var(--cobalt);outline-offset:2px}"
+    },
+    {
+      "name": "Chat Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Assistant text field.",
+      "html": "<input class=\"ds-input\" placeholder=\"Escribí, por ejemplo: 2 crunchy dobles\">",
+      "css": ".ds-input{min-height:48px;width:100%;padding:0 16px;border-radius:6px;border:2px solid var(--line-strong);background:#fff;color:var(--cobalt);font-family:var(--font);font-size:1rem}.ds-input::placeholder{color:#5470A8}.ds-input:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px var(--soft)}"
+    },
+    {
+      "name": "Horario Shift",
+      "kind": "custom",
+      "refersTo": "shift-time",
+      "description": "Day name in extended Archivo over a yellow condensed time bar, on cobalt.",
+      "html": "<div class=\"ds-shift\"><b>Martes a jueves</b><span>De 21:30 a 01:00 hs</span></div>",
+      "css": ".ds-shift{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--cobalt);color:#fff;padding:24px}.ds-shift b{font-family:var(--font);font-weight:900;font-stretch:118%;text-transform:uppercase;font-size:2.4rem;line-height:.92;letter-spacing:-.01em}.ds-shift span{display:inline-block;min-width:260px;text-align:center;padding:.28em .9em .2em;border-radius:3px;background:var(--yellow);color:var(--cobalt-night);font-family:var(--font);font-weight:900;font-stretch:75%;font-size:1.5rem;text-transform:uppercase;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Checker Band",
+      "kind": "custom",
+      "description": "Cobalt/white checkerboard marking every cobalt-to-paper hand-off; module 9px mobile, 12px desktop.",
+      "html": "<div class=\"ds-checker\"></div>",
+      "css": ".ds-checker{height:18px;background:repeating-conic-gradient(var(--cobalt) 0 25%,#fff 0 50%) 0 0/18px 18px}"
     }
   ],
   "narrative": {
-    "northStar": "El flyer que toma pedidos",
-    "overview": "El sistema es la gramática de los flyers de Instagram de Charly's llevada a una interfaz que funciona: tinta azul sobre papel blanco frío, franjas de cuadrillé, titulares geométricos pesados en mayúsculas, precios impresos sobre trazos de pincel reales recortados de los propios flyers, notas a mano con flechas y sellos circulares. La comida es el único otro color; todo lo demás es azul o papel.\n\nLa densidad es de flyer, no de dashboard: pocos elementos por pantalla, tipografía enorme, bloques de color a sangre alternando con papel. Los elementos impresos (precios, banners, sellos, notas) se apoyan levemente torcidos, entre -9° y 10°, como pegados a mano. La parte operativa (hojas, carrito, asistente) mantiene la misma tinta pero se ordena en filas limpias, separadas por líneas punteadas, y el carrito toma la forma de una comanda de cocina.\n\nMobile-first y de una mano: objetivos táctiles de 44 px o más, un dock fijo abajo en el celular, hojas que suben desde el borde inferior. El movimiento es expo ease-out en todo, con una sola excepción con rebote: las capas que caen en la pila del armador.",
+    "northStar": "La carta que toma pedidos",
+    "overview": "The site is two real objects of the local, made to work: the cobalt flyer (product name in giant condensed yellow, the cut-out burger, prices at the foot) and the white printed carta (cobalt checkerboard borders, Lilita One rows, prices in solid cobalt boxes). Everything else, from the cart (a comanda ticket) to the builder (a line-drawn burger that stacks up), is one of those two objects extended. The identity is client-pinned (Oct 2026 rebrand): cobalt, yellow and paper are the only inks, and the brand's own vector assets (logo, wordmark, the 1930s line-drawn cat, the script lettering) carry the personality.\n\nDensity is a menu's density: many rows, tight leading, fat prices that are also the buttons. Fields alternate between cobalt flood (status bar, hero, flyers, horarios, footer) and white paper (carta, sheets, comanda), and a checkerboard band or border marks every hand-off between them. Motion is quick and decelerating everywhere, with one bounce reserved for the builder stack.\n\nCopy grounding is literal: \"Hamburguesería y sandwichería\" is the client's Instagram bio; hours and location come from the Horarios story and bio; prices from the printed carta (Oct 2026). Nothing on a surface is invented brand voice.",
     "keyCharacteristics": [
-      "Dos tintas: familia azul y papel blanco; la fotografía de comida es el único color extra.",
-      "Cuadrillé azul y blanco como borde, banda, piso y marco.",
-      "Precios y banners sobre trazos de pincel raster, en Archivo itálica 900 condensada.",
-      "Titulares League Spartan 900 en mayúsculas, interlineado por debajo de 1.",
-      "Notas a mano en Caveat Brush con flecha dibujada.",
-      "Rotaciones chicas en todo lo \"impreso\"; la UI operativa queda derecha.",
-      "Comanda con bordes dentados como forma del carrito y de los resúmenes."
+      "Three inks only: cobalt, yellow, paper; mist and soft are cobalt tints of paper, not new hues.",
+      "Flyer panels bleed edge to edge like the Instagram grid, 3px gutters, 4:5 ratio.",
+      "Every price box is a button that opens the builder at that size.",
+      "Brand lettering (\"Nuestra carta\", \"Nuestros horarios\", \"Todo sale con papas\") is vector SVG, never set in a font.",
+      "The cat hosts: full body in the hero and empty cart; face in a circle on the carta, horarios, chat avatar, builder.",
+      "Line drawing in cobalt (3px stroke, round joins) for the builder stack, matching the mascot and logo burger."
     ],
     "rules": [
-      { "name": "Regla de las Dos Tintas", "body": "Todo color de interfaz sale de la familia azul o del papel. La única otra fuente de color permitida es la fotografía de producto. Un rojo, amarillo o verde de UI rompe el flyer.", "section": "colors" },
-      { "name": "Regla del Campo y la Tinta", "body": "El azul Charly's es para campos y botones; la tinta azul es para texto sobre papel. Texto largo sobre campo azul va en papel o en papel sobre azul, nunca en tinta azul.", "section": "colors" },
-      { "name": "Regla del Titular Pesado", "body": "Todo h1 a h4 es League Spartan 900 en mayúsculas, interlineado 0.95 o menos, tracking -0.01em y text-wrap balance. No hay titulares livianos.", "section": "typography" },
-      { "name": "Regla de la Cifra Tabular", "body": "Todo precio, contador, total y hora usa cifras tabulares.", "section": "typography" },
-      { "name": "Regla de la Mano Escasa", "body": "Caveat Brush aparece como nota corta (dos a cuatro palabras) y siempre en minúscula de oración; nunca en botones, títulos ni texto largo.", "section": "typography" },
-      { "name": "Regla de la Sombra Azul", "body": "Toda sombra es azul marino translúcida con spread negativo o drop-shadow difuso. Nunca sombra negra, nunca sombra desplazada sin desenfoque.", "section": "elevation" }
+      {
+        "name": "The Three Inks Rule",
+        "body": "Cobalt, yellow, paper. Any other value must be a tint or shade of these; no reds, no greens, no gray neutrals.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yellow-On-Cobalt Rule",
+        "body": "Yellow is set on cobalt fields; on paper it is only a fill behind cobalt-night text, never yellow text on white.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lettering Is Art Rule",
+        "body": "\"Nuestra carta\", \"Nuestros horarios\" and \"Todo sale con papas\" are the brand's vector lettering (img/brand). Never retype them in Pacifico or any font, and never invent new lettering phrases.",
+        "section": "typography"
+      },
+      {
+        "name": "The Money Is Lilita Rule",
+        "body": "Every price, count and total is Lilita One with tabular figures; Archivo never sets a price.",
+        "section": "typography"
+      },
+      {
+        "name": "The Short Script Rule",
+        "body": "Pacifico is limited to notes of a few words, rotated slightly, never a heading or a sentence of body.",
+        "section": "typography"
+      },
+      {
+        "name": "The Night-Shadow Rule",
+        "body": "Every shadow is a tint of cobalt-night, never black or gray.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Pressed Rule",
+        "body": "On `:active`, lift resets to `translateY(0) scale(.97)` with no shadow.",
+        "section": "elevation"
+      }
     ],
     "dos": [
-      "Hacé que todo color de interfaz salga de la familia azul o del papel; dejá que la foto de comida sea el único color extra.",
-      "Hacé los precios en Archivo itálica 900 al 80% sobre los trazos de pincel de img/brush, levemente girados.",
-      "Hacé los titulares en League Spartan 900 en mayúsculas con interlineado de 0.95 o menos.",
-      "Hacé que los bordes de sección y los escenarios de producto usen cuadrillé azul y blanco en módulos de 12 a 24px.",
-      "Hacé que todo resumen de pedido tome la forma de la comanda dentada.",
-      "Hacé las transiciones con expo ease-out (cubic-bezier(.16,1,.3,1) o (.19,1,.22,1)) y los cierres con ease-in corto.",
-      "Hacé que todo objetivo táctil mida 44px o más y que toda animación se anule con reducir movimiento, incluido el giro automático del modelo 3D.",
-      "Hacé las sombras en azul marino translúcido con spread negativo."
+      "**Do** keep to cobalt (#1446A9), yellow (#FEB905) and paper; derive anything else as a cobalt tint or shade.",
+      "**Do** set product names on cobalt in Archivo 900 condensed yellow, fitted to the panel width.",
+      "**Do** make every price a Lilita One price box, and make it the action for that item and size.",
+      "**Do** close every cobalt-to-paper hand-off with the checkerboard, sized from the 9px/12px module.",
+      "**Do** use the brand's SVG lettering and cat assets as-is; cat face in a circle for hosts, full body only in hero and empty cart.",
+      "**Do** use decelerating easing (`cubic-bezier(.16,1,.3,1)`) for state changes and honor reduced motion.",
+      "**Do** keep touch targets at 44px minimum."
     ],
     "donts": [
-      "No agregues un tercer color de interfaz (rojos de oferta, verdes de éxito, amarillos de aviso); los estados se resuelven con azul, papel y forma.",
-      "No uses la curva de rebote fuera de la pila del armador.",
-      "No reemplaces los trazos de pincel raster por fondos CSS planos o redondeados: el pincel real de los flyers es el material.",
-      "No uses Caveat Brush para botones, títulos ni párrafos.",
-      "No pongas sombras negras ni desplazadas sin desenfoque.",
-      "No encierres la comida en tarjetas con sombra en grilla pareja; el plato vive sobre su escenario de cuadrillé o su panel azul.",
-      "No gires la UI operativa (botones, campos, filas, hojas); la rotación es solo para lo impreso: precios, banners, sellos, notas y el marco de cuadrillé.",
-      "No uses un botón flotante de WhatsApp; el pedido sale por el asistente y la comanda."
+      "**Don't** add a fourth hue or gray neutrals; no black shadows.",
+      "**Don't** set yellow text on paper.",
+      "**Don't** typeset \"Nuestra carta\", \"Nuestros horarios\" or \"Todo sale con papas\" in a font, or invent new script lettering.",
+      "**Don't** grow the hero H1 beyond 6.6rem.",
+      "**Don't** use the builder's bounce easing anywhere else.",
+      "**Don't** put products in equal rounded cards with photos; flyers are full-bleed panels and the carta is rows.",
+      "**Don't** use a floating WhatsApp bubble; the order goes to WhatsApp through the assistant and comanda.",
+      "**Don't** use Pacifico for headings or sentences."
     ]
   }
 }

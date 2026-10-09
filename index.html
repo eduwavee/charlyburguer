@@ -12,7 +12,7 @@
 <meta property="og:image" content="img/brand/og.jpg">
 <link rel="icon" href="img/brand/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="img/brand/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/anton-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/archivo-normal-latin.woff2" crossorigin>
 <link rel="preload" as="image" href="img/cut/burger-3d-poster.webp" fetchpriority="high">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="assets/fonts/fonts.css">
@@ -109,7 +109,6 @@
         <span slot="progress-bar"></span>
       </model-viewer>
       <img class="hero-gato" src="img/brand/gato-cuerpo.svg" alt="" width="220" height="290">
-      <p class="script hero-note note-arrow" id="heroNote" aria-hidden="true">¡recién armada!<svg class="hand-arrow"><use href="#i-arrow"/></svg></p>
     </div>
   </div>
   <div class="checker checker-band" aria-hidden="true"></div>
@@ -138,6 +137,7 @@
         <a class="tab" href="#cat-agregados">Agregados</a>
       </nav>
 
+      <div class="carta-grid">
       <div class="cat" id="cat-burgers" aria-labelledby="catBurgers">
         <div class="cat-head">
           <h3 class="cat-title" id="catBurgers">Hamburguesas:</h3>
@@ -151,7 +151,6 @@
         <ul class="board" data-cat="lomitos"></ul>
       </div>
 
-      <div class="cat-pair">
         <div class="cat" id="cat-papas" aria-labelledby="catPapas">
           <div class="cat-head"><h3 class="cat-title" id="catPapas">Porciones de papas:</h3></div>
           <ul class="board is-compact" data-cat="papas"></ul>
@@ -162,6 +161,7 @@
           <p class="cat-note">Carne, huevo y papas extra se suman cuando armás tu burger o tu lomo.</p>
           <ul class="board is-compact" data-cat="agregados"></ul>
         </div>
+
       </div>
 
       <p class="todo-papas"><img src="img/brand/todo-sale-con-papas.svg" alt="Todo sale con papas" width="550" height="91" loading="lazy"></p>
