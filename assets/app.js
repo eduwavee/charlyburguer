@@ -32,11 +32,12 @@
   var P = {};
   C.productos.forEach(function (p) { P[p.id] = p; });
   var X = {};
-  C.extras.forEach(function (x) { X[x.id] = x; });
+  C.agregados.forEach(function (x) { X[x.id] = x; });
 
   /* ------------------------------------------------------------ horario */
   var DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   var toMin = function (hhmm) { var a = hhmm.split(':'); return (+a[0]) * 60 + (+a[1]); };
+  var turno = function (dow) { return C.horario[dow] || null; };
 
   function localNow() {
     try {
@@ -54,32 +55,50 @@
     }
   }
 
+  /* Cada turno cuenta para el día en que abre, aunque cierre pasada la medianoche. */
   function openState() {
-    var H = C.horario, abre = toMin(H.abre), cierra = toMin(H.cierra), cruza = cierra <= abre;
-    var n = localNow(), dias = H.dias;
-    if (cruza) {
-      if (dias.indexOf(n.dow) > -1 && n.min >= abre) return { open: true, left: 1440 - n.min + cierra };
-      if (dias.indexOf((n.dow + 6) % 7) > -1 && n.min < cierra) return { open: true, left: cierra - n.min };
-    } else if (dias.indexOf(n.dow) > -1 && n.min >= abre && n.min < cierra) {
-      return { open: true, left: cierra - n.min };
+    var n = localNow();
+    var hoy = turno(n.dow), ayer = turno((n.dow + 6) % 7);
+    if (ayer && toMin(ayer[1]) <= toMin(ayer[0]) && n.min < toMin(ayer[1])) {
+      return { open: true, left: toMin(ayer[1]) - n.min, cierra: ayer[1], dia: (n.dow + 6) % 7 };
     }
-    var when = '';
-    if (dias.indexOf(n.dow) > -1 && n.min < abre) when = 'hoy';
-    else {
-      for (var d = 1; d <= 7; d++) {
-        if (dias.indexOf((n.dow + d) % 7) > -1) { when = d === 1 ? 'mañana' : 'el ' + DIAS[(n.dow + d) % 7]; break; }
+    if (hoy) {
+      var a = toMin(hoy[0]), c = toMin(hoy[1]), cruza = c <= a;
+      if (n.min >= a && (cruza || n.min < c)) {
+        return { open: true, left: cruza ? 1440 - n.min + c : c - n.min, cierra: hoy[1], dia: n.dow };
       }
+      if (n.min < a) return { open: false, when: 'hoy', abre: hoy[0], dia: n.dow };
     }
-    return { open: false, when: when, dow: n.dow };
+    for (var d = 1; d <= 7; d++) {
+      var t = turno((n.dow + d) % 7);
+      if (t) return { open: false, when: d === 1 ? 'mañana' : 'el ' + DIAS[(n.dow + d) % 7], abre: t[0], dia: n.dow };
+    }
+    return { open: false, when: '', abre: '', dia: n.dow };
   }
 
   var laHora = function (hhmm) { return (parseInt(hhmm, 10) === 1 ? 'la ' : 'las ') + hhmm; };
 
   function statusLine(s) {
     if (s.open) {
-      return s.left <= 30 ? 'Abierto · cerramos en ' + s.left + ' min' : 'Abierto ahora · hasta ' + laHora(C.horario.cierra);
+      return s.left <= 30 ? 'Abierto · cerramos en ' + s.left + ' min' : 'Abierto ahora · hasta ' + laHora(s.cierra);
     }
-    return 'Cerrado · abrimos ' + s.when + ' a ' + laHora(C.horario.abre);
+    return 'Cerrado · abrimos ' + s.when + ' a ' + laHora(s.abre);
+  }
+
+  /* Agrupa días seguidos con el mismo turno: "Martes a jueves 21:30 a 01:00". */
+  function shiftGroups() {
+    var orden = [2, 3, 4, 5, 6, 0, 1], groups = [];
+    orden.forEach(function (d) {
+      var t = turno(d), key = t ? t.join('-') : 'cerrado', last = groups[groups.length - 1];
+      if (last && last.key === key) last.dias.push(d);
+      else groups.push({ key: key, t: t, dias: [d] });
+    });
+    return groups.map(function (g) {
+      var a = DIAS[g.dias[0]], b = DIAS[g.dias[g.dias.length - 1]];
+      var nombre = g.dias.length === 1 ? a : a + ' a ' + (b === 'domingo' ? 'domingos' : b);
+      g.nombre = nombre.charAt(0).toUpperCase() + nombre.slice(1);
+      return g;
+    });
   }
 
   function renderStatus() {
@@ -88,39 +107,48 @@
     bar.classList.toggle('is-open', s.open);
     $('#statusText').textContent = statusLine(s);
     var cs = $('#chatStatus');
-    if (cs) cs.textContent = s.open ? 'Abierto · hasta ' + C.horario.cierra : 'Cerrado · abre ' + s.when + ' ' + C.horario.abre;
+    if (cs) cs.textContent = s.open ? 'Abierto · hasta ' + s.cierra : 'Cerrado · abre ' + s.when + ' ' + s.abre;
     renderHours(s);
   }
 
-  function renderHours() {
-    var list = $('#hours');
+  function renderHours(s) {
+    var list = $('#shifts');
     if (!list) return;
-    var today = localNow().dow;
-    var orden = [1, 2, 3, 4, 5, 6, 0];
-    list.innerHTML = orden.map(function (d) {
-      var abierto = C.horario.dias.indexOf(d) > -1;
-      var nombre = DIAS[d].charAt(0).toUpperCase() + DIAS[d].slice(1);
-      return '<li' + (d === today ? ' class="is-today"' : '') + '><span>' + nombre + '</span><b>' +
-        (abierto ? C.horario.abre + ' – ' + C.horario.cierra : 'Cerrado') + '</b></li>';
+    list.innerHTML = shiftGroups().map(function (g) {
+      var today = g.dias.indexOf(s.dia) > -1;
+      return '<li' + (g.t ? '' : ' class="is-closed"') + '><b>' + esc(g.nombre) +
+        (today ? '<span class="shift-today">Hoy</span>' : '') + '</b>' +
+        '<span class="shift-time">' + (g.t ? 'De ' + g.t[0] + ' a ' + g.t[1] + ' hs' : 'Cerrado') + '</span></li>';
     }).join('');
   }
 
-  /* ------------------------------------------------------------ carrito */
-  var cart = (store.get('charlys.carrito') || []).filter(function (it) { return it && P[it.id] && it.qty > 0; });
+  function hoursText() {
+    return shiftGroups().filter(function (g) { return g.t; }).map(function (g) {
+      return g.nombre.toLowerCase() + ' de ' + g.t[0] + ' a ' + g.t[1];
+    }).join(' y ');
+  }
 
-  var sizeName = function (n) { return ['', 'simple', 'doble', 'triple', 'cuádruple'][n] || n + ' carnes'; };
+  /* ------------------------------------------------------------ carrito */
+  var CART_KEY = 'charlys.carrito.v2', LAST_KEY = 'charlys.ultimo.v2';
+  var cart = (store.get(CART_KEY) || []).filter(function (it) { return it && P[it.id] && it.qty > 0; });
+
+  var CARNES = { simple: 1, doble: 2 };
+  var sizeLabel = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+  var envioLabel = function () { return money(C.entrega.delivery.costo) + (C.entrega.delivery.confirmado ? '' : ' (a confirmar)'); };
+
+  function basePrice(p, tamano) {
+    return p.tamanos ? p.tamanos[tamano || 'simple'] : p.precio;
+  }
 
   function unitPrice(it) {
-    var p = P[it.id], t = p.precio;
-    if (p.carnes) t += Math.max(0, (it.carnes || p.carnes.incluidas) - p.carnes.incluidas) * C.carneExtra;
+    var p = P[it.id], t = basePrice(p, it.tamano);
     (it.extras || []).forEach(function (x) { if (X[x]) t += X[x].precio; });
     return t;
   }
 
   function itemTitle(it) {
     var p = P[it.id], t = p.nombre;
-    if (p.carnes) t += ' ' + sizeName(it.carnes);
-    if (it.opcion) t += ' (' + it.opcion + ')';
+    if (p.tamanos) t += ' ' + (it.tamano || 'simple');
     return t;
   }
 
@@ -136,14 +164,14 @@
   }
 
   function signature(it) {
-    return [it.id, it.carnes || '', (it.extras || []).slice().sort().join('+'), (it.quitar || []).slice().sort().join('+'),
-      it.opcion || '', norm(it.nota || '').trim()].join('|');
+    return [it.id, it.tamano || '', (it.extras || []).slice().sort().join('+'), (it.quitar || []).slice().sort().join('+'),
+      norm(it.nota || '').trim()].join('|');
   }
 
   function cleanItem(it) {
     return {
-      id: it.id, carnes: it.carnes || null, extras: (it.extras || []).slice(), quitar: (it.quitar || []).slice(),
-      opcion: it.opcion || null, nota: (it.nota || '').trim(), qty: Math.max(1, Math.min(20, it.qty || 1))
+      id: it.id, tamano: P[it.id].tamanos ? (it.tamano || 'simple') : null, extras: (it.extras || []).slice(), quitar: (it.quitar || []).slice(),
+      nota: (it.nota || '').trim(), qty: Math.max(1, Math.min(20, it.qty || 1))
     };
   }
 
@@ -178,7 +206,7 @@
   }
 
   function saveCart(bump) {
-    store.set('charlys.carrito', cart);
+    store.set(CART_KEY, cart);
     renderCartUI(bump);
   }
 
@@ -211,36 +239,46 @@
     'pan-arriba': '<svg viewBox="0 0 200 72"><path class="ink f-paper" d="M10 66C8 33 48 6 100 6s92 27 90 60c0 2.5-2 4-4.5 4h-171C12 70 10 68.5 10 66Z"/><path class="ink f-none" d="M48 30c10-9 22-14 36-15"/><path class="ink f-none" d="M38 42c3-3 6-5 9-7"/></svg>',
     'pan-abajo': '<svg viewBox="0 0 200 36"><path class="ink f-paper" d="M10 5h180c3 0 5 3 4 6-5 14-19 20-40 20H46C25 31 11 25 6 11c-1-3 1-6 4-6Z"/></svg>',
     carne: '<svg viewBox="0 0 200 28"><path class="ink f-blue" d="M12 6c18-4 38-1 58-3s40 2 60 0 40-1 58 3c6 2 7 12 1 15-18 5-38 2-58 4s-40-2-60 0-40 1-58-3c-7-2-7-14-1-16Z"/><g class="dots"><circle cx="38" cy="12" r="1.9"/><circle cx="64" cy="17" r="1.7"/><circle cx="92" cy="11" r="1.9"/><circle cx="118" cy="17" r="1.7"/><circle cx="146" cy="12" r="1.9"/><circle cx="170" cy="16" r="1.7"/></g></svg>',
-    cheddar: '<svg viewBox="0 0 200 22"><path class="ink f-soft" d="M8 4h184l-3 7h-26l-4 7c-1.5 2.5-4.5 2.5-6 0l-4-7H74l-3 5c-1.5 2.5-4.5 2.5-6 0l-3-5H11Z"/></svg>',
+    'lomo-arriba': '<svg viewBox="0 0 200 46"><path class="ink f-paper" d="M8 40C6 22 40 6 100 6s96 16 92 34c-.5 2.5-2.5 4-5 4H13c-2.5 0-4.5-1.5-5-4Z"/><path class="ink f-none" d="M44 22c10-6 24-9 38-10M122 13c10 1 22 4 30 8"/></svg>',
+    'lomo-abajo': '<svg viewBox="0 0 200 26"><path class="ink f-paper" d="M8 4h184c3 0 5 3 3.5 6-4 9-16 12-34 12H38C20 22 8 19 4.5 10 3 7 5 4 8 4Z"/></svg>',
+    lomo: '<svg viewBox="0 0 200 22"><path class="ink f-blue" d="M10 6c20-3 40 1 60-1s40 2 60 0 40-2 60 1c5 1 5 10 0 11-20 3-40-1-60 1s-40-2-60 0-40 2-60-1c-5-1-5-10 0-11Z"/><g class="dots"><circle cx="34" cy="11" r="1.6"/><circle cx="74" cy="12" r="1.6"/><circle cx="112" cy="10" r="1.6"/><circle cx="150" cy="12" r="1.6"/><circle cx="178" cy="10" r="1.6"/></g></svg>',
+    jamon: '<svg viewBox="0 0 200 16"><path class="ink f-soft" d="M8 6c14-5 26 3 40 0s26-4 40 0 26 3 40 0 26-4 40 0 14 3 24 1v5c-10 3-14-1-24 0s-26 4-40 0-26-3-40 0-26 4-40 0-26-3-40 0Z"/></svg>',
+    mayonesa: '<svg viewBox="0 0 200 14"><path class="ink f-paper" d="M10 3h180v4h-38c0 5-6 5-6 0H96c0 6-7 6-7 0H48c0 4-5 4-5 0H10Z"/></svg>',
+    mostaza: '<svg viewBox="0 0 200 14"><path class="ink f-yellow" d="M10 3h180v4h-30c0 5-6 5-6 0H110c0 6-7 6-7 0H60c0 4-5 4-5 0H10Z"/></svg>',
+    ketchup: '<svg viewBox="0 0 200 14"><path class="ink f-blue" d="M10 3h180v4h-44c0 5-6 5-6 0H90c0 6-7 6-7 0H40c0 4-5 4-5 0H10Z"/></svg>',
+    pepinillos: '<svg viewBox="0 0 200 16"><g class="ink f-soft"><ellipse cx="36" cy="8" rx="20" ry="5.5"/><ellipse cx="82" cy="8" rx="20" ry="5.5"/><ellipse cx="128" cy="8" rx="20" ry="5.5"/><ellipse cx="170" cy="8" rx="18" ry="5.5"/></g><g class="dots-ink"><circle cx="30" cy="8" r="1.4"/><circle cx="42" cy="8" r="1.4"/><circle cx="76" cy="8" r="1.4"/><circle cx="88" cy="8" r="1.4"/><circle cx="122" cy="8" r="1.4"/><circle cx="134" cy="8" r="1.4"/><circle cx="166" cy="8" r="1.4"/><circle cx="176" cy="8" r="1.4"/></g></svg>',
+    morada: '<svg viewBox="0 0 200 18"><g class="ink f-none"><ellipse cx="34" cy="9" rx="20" ry="5"/><ellipse cx="34" cy="9" rx="11" ry="2.4"/><ellipse cx="82" cy="9" rx="20" ry="5"/><ellipse cx="82" cy="9" rx="11" ry="2.4"/><ellipse cx="128" cy="9" rx="20" ry="5"/><ellipse cx="128" cy="9" rx="11" ry="2.4"/><ellipse cx="170" cy="9" rx="18" ry="5"/><ellipse cx="170" cy="9" rx="10" ry="2.4"/></g></svg>',
+    criolla: '<svg viewBox="0 0 200 16"><path class="ink f-paper" d="M10 4h180v5H10Z"/><g class="dots-ink"><rect x="22" y="9" width="7" height="5" rx="1.5"/><rect x="44" y="10" width="6" height="5" rx="1.5"/><rect x="66" y="9" width="7" height="5" rx="1.5"/><rect x="90" y="10" width="6" height="5" rx="1.5"/><rect x="112" y="9" width="7" height="5" rx="1.5"/><rect x="136" y="10" width="6" height="5" rx="1.5"/><rect x="158" y="9" width="7" height="5" rx="1.5"/><rect x="178" y="10" width="6" height="4" rx="1.5"/></g></svg>',
+    cheddar: '<svg viewBox="0 0 200 22"><path class="ink f-yellow" d="M8 4h184l-3 7h-26l-4 7c-1.5 2.5-4.5 2.5-6 0l-4-7H74l-3 5c-1.5 2.5-4.5 2.5-6 0l-3-5H11Z"/></svg>',
     tybo: '<svg viewBox="0 0 200 22"><path class="ink f-paper" d="M8 4h184l-3 7h-26l-4 7c-1.5 2.5-4.5 2.5-6 0l-4-7H74l-3 5c-1.5 2.5-4.5 2.5-6 0l-3-5H11Z"/></svg>',
     lechuga: '<svg viewBox="0 0 200 22"><path class="ink f-paper" d="M6 13C10 5 16 16 26 9S42 14 46 8S62 15 66 8S82 15 86 8S102 15 106 8S122 15 126 8S142 15 146 8S162 15 166 8S182 15 186 9C192 8 196 12 194 16C193 18 191 19 188 19H12C8 19 5 16 6 13Z"/></svg>',
     tomate: '<svg viewBox="0 0 200 20"><rect class="ink f-soft" x="14" y="3" width="84" height="14" rx="7"/><rect class="ink f-soft" x="102" y="3" width="84" height="14" rx="7"/><g class="dots-ink"><ellipse cx="40" cy="10" rx="3" ry="2"/><ellipse cx="58" cy="10" rx="3" ry="2"/><ellipse cx="76" cy="10" rx="3" ry="2"/><ellipse cx="128" cy="10" rx="3" ry="2"/><ellipse cx="146" cy="10" rx="3" ry="2"/><ellipse cx="164" cy="10" rx="3" ry="2"/></g></svg>',
     panceta: '<svg viewBox="0 0 200 20"><path class="ink f-soft" d="M10 6C30 0 46 12 70 6S112 0 134 6S172 12 190 5V13C172 20 152 8 132 14S90 20 70 14S30 8 10 14Z"/><path class="ink f-none" stroke-dasharray="10 8" d="M18 10C34 6 50 14 70 10S112 6 134 10S168 14 182 9"/></svg>',
     cebolla: '<svg viewBox="0 0 200 20"><g class="ink f-none"><path d="M14 13c6-8 16-8 22 0"/><path d="M34 11c8-7 18-5 24 3"/><path d="M58 14c5-9 17-10 24-1"/><path d="M80 10c8-5 18-3 22 5"/><path d="M100 14c6-8 16-9 22 0"/><path d="M120 11c8-6 18-4 24 4"/><path d="M142 13c5-8 17-9 24 0"/><path d="M164 11c8-6 16-3 22 4"/></g></svg>',
     caramelizada: '<svg viewBox="0 0 200 18"><path class="ink f-soft" d="M10 7c20-5 40 5 60 0s40 5 60 0 40-5 60 1v6c-20-5-40 4-60 0s-40 5-60 0-40 4-60-1Z"/><path class="ink f-none" d="M24 10c10-3 18 2 28 0M84 10c10-3 18 2 28 0M144 10c10-3 18 2 28 0"/></svg>',
-    huevo: '<svg viewBox="0 0 200 24"><path class="ink f-paper" d="M16 13c0-8 34-10 84-10 52 0 84 3 84 10s-30 9-84 9c-52 0-84-1-84-9Z"/><ellipse class="ink f-blue" cx="108" cy="11" rx="20" ry="7"/></svg>',
+    huevo: '<svg viewBox="0 0 200 24"><path class="ink f-paper" d="M16 13c0-8 34-10 84-10 52 0 84 3 84 10s-30 9-84 9c-52 0-84-1-84-9Z"/><ellipse class="ink f-yellow" cx="108" cy="11" rx="20" ry="7"/></svg>',
     salsa: '<svg viewBox="0 0 200 14"><path class="ink f-soft" d="M10 3h180v4h-38c0 5-6 5-6 0H96c0 6-7 6-7 0H48c0 4-5 4-5 0H10Z"/></svg>',
     barbacoa: '<svg viewBox="0 0 200 14"><path class="ink f-blue" d="M10 3h180v4h-38c0 5-6 5-6 0H96c0 6-7 6-7 0H48c0 4-5 4-5 0H10Z"/></svg>',
-    pollo: '<svg viewBox="0 0 200 32"><path class="ink f-soft" d="M14 11c4-5 10-3 14-6 6-3 12 1 18-1s12 2 20-1 12 3 20 0 12 2 20-1 12 3 20 0 14 2 20-1 12 3 18 1c8 1 12 7 9 11 3 5-1 11-8 11-6 3-12-1-18 2s-12-2-20 1-12-3-20 0-12-2-20 1-12-3-20 0-12-2-18 0c-8-1-12-6-9-10-4-4-1-9 4-9Z"/><g class="dots-ink"><circle cx="40" cy="14" r="1.7"/><circle cx="70" cy="20" r="1.7"/><circle cx="96" cy="12" r="1.7"/><circle cx="124" cy="20" r="1.7"/><circle cx="150" cy="13" r="1.7"/><circle cx="172" cy="19" r="1.7"/></g></svg>'
   };
 
   function layersFor(it) {
     var p = P[it.id];
     if (!p || !p.capas) return null;
-    var quitar = it.quitar || [];
-    var out = [{ k: 'pan-abajo', t: 'pan-abajo' }];
+    var quitar = it.quitar || [], pan = p.pan === 'lomo' ? 'lomo' : 'pan', seen = {};
+    var out = [{ k: pan + '-abajo', t: pan + '-abajo' }];
+    var push = function (t) { seen[t] = (seen[t] || 0) + 1; out.push({ k: t + '-' + seen[t], t: t }); };
     p.capas.forEach(function (c) {
       if (c === 'CARNES') {
-        for (var i = 1; i <= (it.carnes || 1); i++) {
-          out.push({ k: 'carne-' + i, t: 'carne' });
-          out.push({ k: 'queso-' + i, t: p.carnes.queso });
-        }
+        for (var i = 1; i <= (CARNES[it.tamano] || 1); i++) { push('carne'); push(p.queso); }
       } else if (quitar.indexOf(c) === -1) {
-        out.push({ k: c, t: c });
+        push(c);
       }
     });
-    (it.extras || []).forEach(function (x) { if (X[x] && X[x].capa) out.push({ k: 'x-' + x, t: X[x].capa }); });
-    out.push({ k: 'pan-arriba', t: 'pan-arriba' });
+    (it.extras || []).forEach(function (x) {
+      if (!X[x] || !X[x].capa) return;
+      [].concat(X[x].capa).forEach(function (c) { out.push({ k: 'x-' + x + '-' + c, t: c }); });
+    });
+    out.push({ k: pan + '-arriba', t: pan + '-arriba' });
     return out;
   }
 
@@ -283,9 +321,9 @@
     }
   }
 
-  function stackEl(cls) {
+  function stackEl(cls, id) {
     var s = document.createElement('div');
-    s.className = 'stack' + (cls ? ' ' + cls : '');
+    s.className = 'stack' + (cls ? ' ' + cls : '') + (id && P[id].pan === 'lomo' ? ' is-lomo' : '');
     s.setAttribute('role', 'img');
     return s;
   }
@@ -342,68 +380,48 @@
   function hideToast() { $('#toast').classList.remove('is-on'); }
 
   /* ------------------------------------------------------------ carta */
-  function priceTag(p, cls) {
-    var label = '', value = p.precio;
-    if (p.carnes && p.destaque) { label = 'la ' + sizeName(2); value = p.precio + (2 - p.carnes.incluidas) * C.carneExtra; }
-    else if (p.carnes) label = 'desde';
-    else if (p.precioEtiqueta) label = p.precioEtiqueta;
-    return '<span class="price-tag' + (cls ? ' ' + cls : '') + '">' + (label ? '<small>' + esc(label) + '</small>' : '') + '<b>' + money(value) + '</b></span>';
-  }
-
-  function noteHTML(text) {
-    return '<p class="hand dish-note note-arrow" aria-hidden="true">' + esc(text) + '<svg class="hand-arrow"><use href="#i-arrow"/></svg></p>';
-  }
-
-  function dishBody(p, btnCls) {
-    var verb = p.carnes ? 'Armala' : 'Agregar';
-    return '<div class="dish-body">' +
-      '<h4 class="dish-name">' + esc(p.nombre) + '</h4>' +
-      (p.banner ? '<p class="banner-label' + (p.destaque ? ' is-white' : '') + '">' + esc(p.banner) + '</p>' : '') +
-      '<p class="dish-desc">' + esc(p.descripcion) + '</p>' +
-      '<button class="btn ' + btnCls + '" type="button" data-customize="' + p.id + '" aria-label="' + verb + ' ' + esc(p.nombre) + '">' + verb + '</button>' +
-    '</div>';
+  function sizeButtons(p, cls) {
+    if (p.tamanos) {
+      return Object.keys(p.tamanos).map(function (s) {
+        return '<button class="price-box' + (cls ? ' ' + cls : '') + '" type="button" data-customize="' + p.id + '" data-size="' + s + '"' +
+          ' aria-label="Armar ' + esc(p.nombre) + ' ' + s + ', ' + money(p.tamanos[s]) + '"><small>' + sizeLabel(s) + '</small>' + money(p.tamanos[s]) + '</button>';
+      }).join('');
+    }
+    var custom = p.capas || (p.extras && p.extras.length);
+    return '<button class="price-box' + (cls ? ' ' + cls : '') + '" type="button" ' + (custom ? 'data-customize' : 'data-add') + '="' + p.id + '"' +
+      ' aria-label="' + (custom ? 'Armar ' : 'Agregar ') + esc(p.nombre) + ', ' + money(p.precio) + '">' + (custom ? '' : icon('plus')) + money(p.precio) + '</button>';
   }
 
   function renderMenu() {
-    var n = 0;
-    $('.dishes[data-cat="burgers"]').innerHTML = C.productos.filter(function (p) { return p.categoria === 'burgers'; }).map(function (p) {
-      var img = '<img class="dish-img" src="' + p.foto + '" alt="' + esc("Charly's " + p.nombre) + '" width="560" height="400" loading="lazy" decoding="async">';
-      if (p.destaque) {
-        return '<article class="dish dish--feature" id="dish-' + p.id + '">' +
-          '<div class="dish-stage"><span class="dish-band" aria-hidden="true"></span>' + img +
-            (p.nota ? noteHTML(p.nota) : '') + priceTag(p, 'is-white') + '</div>' +
-          dishBody(p, 'btn-light') +
-        '</article>';
-      }
-      var flip = n++ % 2 === 1;
-      return '<article class="dish dish--burger' + (flip ? ' is-flip' : '') + '" id="dish-' + p.id + '">' +
-        '<div class="dish-stage"><span class="checker dish-band" aria-hidden="true"></span>' + img +
-          '<span class="checker dish-floor" aria-hidden="true"></span>' + priceTag(p) + '</div>' +
-        dishBody(p, 'btn-blue') +
+    var byCat = function (c) { return C.productos.filter(function (p) { return p.categoria === c; }); };
+
+    $('#flyerRail').innerHTML = C.productos.filter(function (p) { return p.flyer; }).map(function (p) {
+      return '<article class="flyer" id="flyer-' + p.id + '">' +
+        '<img class="flyer-brand" src="img/brand/wordmark-yellow.svg" alt="" width="950" height="425">' +
+        '<h3><span class="visually-hidden">' + esc("Charly's ") + '</span>' + esc(p.flyer.titulo) + '</h3>' +
+        '<img class="flyer-img" src="' + p.flyer.foto + '" alt="' + esc(p.nombre + ': ' + p.descripcion) + '" width="1100" height="' + p.flyer.alto + '" loading="lazy" decoding="async">' +
+        '<div class="flyer-prices">' + sizeButtons(p, 'is-yellow') + '</div>' +
       '</article>';
     }).join('');
 
-    $('.dishes[data-cat="pollo"]').innerHTML = C.productos.filter(function (p) { return p.categoria === 'pollo'; }).map(function (p) {
-      var framed = !!p.limitado;
-      return '<article class="dish dish--photo' + (framed ? ' dish--framed' : '') + '" id="dish-' + p.id + '">' +
-        '<div class="dish-stage">' +
-          '<img class="dish-img" src="' + p.foto + '" alt="' + esc("Charly's " + p.nombre) + '" width="400" height="300" loading="lazy" decoding="async">' +
-          (p.nota ? noteHTML(p.nota) : '') +
-          (framed ? '<div class="seal" aria-hidden="true"><b>Limitado</b><span>por noche</span></div>' : '') +
-          priceTag(p, framed ? 'is-alt' : '') +
-        '</div>' +
-        dishBody(p, 'btn-blue') +
-        (framed ? '<p class="visually-hidden">' + esc(p.limitado) + '</p>' : '') +
-      '</article>';
-    }).join('');
+    ['burgers', 'lomitos', 'papas'].forEach(function (cat) {
+      $('.board[data-cat="' + cat + '"]').innerHTML = byCat(cat).map(function (p) {
+        return '<li class="item" id="item-' + p.id + '">' +
+          '<div><h4>' + esc(p.nombre) + (p.destaque ? '<span class="item-tag">' + esc(p.destaque) + '</span>' : '') + '</h4>' +
+            (p.descripcion ? '<p class="item-desc">' + esc(p.descripcion) + '</p>' : '') + '</div>' +
+          '<div class="item-prices">' + sizeButtons(p) + '</div>' +
+        '</li>';
+      }).join('');
+    });
 
-    $('.sides[data-cat="extras"]').innerHTML = C.productos.filter(function (p) { return p.categoria === 'extras'; }).map(function (p) {
-      return '<li class="side">' +
-        '<div><h4>' + esc(p.nombre) + '</h4><p>' + esc(p.descripcion) + '</p></div>' +
-        '<span class="side-price">' + money(p.precio) + '</span>' +
-        '<button class="add-btn" type="button" data-add="' + p.id + '" aria-label="Agregar ' + esc(p.nombre) + '">' + icon('plus') + '</button>' +
-      '</li>';
-    }).join('');
+    $('.board[data-cat="agregados"]').innerHTML =
+      C.agregados.map(function (x) {
+        return '<li class="item is-builder"><h4>' + esc(x.nombre) + '<span class="item-sub">al armar tu burger o lomo</span></h4>' +
+          '<span class="item-static">' + money(x.precio) + '</span></li>';
+      }).join('') +
+      byCat('sueltos').map(function (p) {
+        return '<li class="item"><h4>' + esc(p.nombre) + '</h4><div class="item-prices">' + sizeButtons(p) + '</div></li>';
+      }).join('');
   }
 
   /* ------------------------------------------------------------ armador (hoja) */
@@ -414,9 +432,8 @@
     preset = preset || {};
     return {
       id: id,
-      carnes: p.carnes ? Math.min(p.carnes.max, preset.carnes || p.carnes.incluidas) : null,
+      tamano: p.tamanos ? (p.tamanos[preset.tamano] ? preset.tamano : 'simple') : null,
       extras: [], quitar: [], nota: '',
-      opcion: p.opciones ? (preset.opcion || p.opciones.valores[0]) : null,
       qty: preset.qty || 1
     };
   }
@@ -426,33 +443,23 @@
     var p = P[id];
     editKey = opts.editKey || null;
     var base = editKey ? cart.filter(function (c) { return c.key === editKey; })[0] : null;
-    draft = base ? JSON.parse(JSON.stringify(base)) : newDraft(id);
+    draft = base ? JSON.parse(JSON.stringify(base)) : newDraft(id, { tamano: opts.tamano });
     var body = $('#customBody');
     var parts = [];
     parts.push('<h2 class="sheet-title" id="customTitle">' + esc(p.nombre) + '</h2>');
-    parts.push('<p class="sheet-sub">' + esc(p.descripcion) + '</p>');
+    parts.push('<p class="sheet-sub">' + esc(p.descripcion) + ' Sale con papas.</p>');
     if (p.capas) {
-      parts.push('<div class="builder-stage"><span class="hand" aria-hidden="true">así va quedando</span><span class="price-tag builder-price"><b id="builderPrice"></b></span><div class="stack" id="builderStack"></div></div>');
-    } else if (p.foto) {
-      parts.push('<div class="builder-photo"><img src="' + p.foto + '" alt=""></div>');
+      parts.push('<div class="builder-stage"><span class="script" aria-hidden="true">así va quedando</span><span class="price-box is-yellow builder-price" id="builderPrice"></span><div class="stack' + (p.pan === 'lomo' ? ' is-lomo' : '') + '" id="builderStack" role="img"></div></div>');
     }
-    if (p.carnes) {
-      var rows = [];
-      for (var n = 1; n <= p.carnes.max; n++) {
-        rows.push('<label class="size-opt"><input type="radio" name="carnes" value="' + n + '"' + (draft.carnes === n ? ' checked' : '') + '>' +
-          '<span>' + sizeName(n) + '<small>' + n + (n === 1 ? ' carne' : ' carnes') + '</small></span></label>');
-      }
-      parts.push('<fieldset class="opt-group"><legend class="opt-legend">Carnes <small>carne extra ' + money(C.carneExtra) + ' c/u</small></legend><div class="size-row">' + rows.join('') + '</div></fieldset>');
-    }
-    if (p.opciones) {
-      parts.push('<fieldset class="opt-group"><legend class="opt-legend">' + esc(p.opciones.titulo) + '</legend><div class="check-list">' +
-        p.opciones.valores.map(function (v) {
-          return '<label class="check-opt"><input type="radio" name="opcion" value="' + esc(v) + '"' + (draft.opcion === v ? ' checked' : '') + '>' +
-            '<span class="row"><span class="box"></span>' + esc(v) + '</span></label>';
+    if (p.tamanos) {
+      parts.push('<fieldset class="opt-group"><legend class="opt-legend">Tamaño</legend><div class="size-row">' +
+        Object.keys(p.tamanos).map(function (s) {
+          return '<label class="size-opt"><input type="radio" name="tamano" value="' + s + '"' + (draft.tamano === s ? ' checked' : '') + '>' +
+            '<span>' + sizeLabel(s) + '<small>' + CARNES[s] + (CARNES[s] === 1 ? ' carne' : ' carnes') + ' · ' + money(p.tamanos[s]) + '</small></span></label>';
         }).join('') + '</div></fieldset>');
     }
     if (p.extras && p.extras.length) {
-      parts.push('<fieldset class="opt-group"><legend class="opt-legend">Sumale <small>opcional</small></legend><div class="check-list">' +
+      parts.push('<fieldset class="opt-group"><legend class="opt-legend">Sumale <small>agregados de la carta</small></legend><div class="check-list">' +
         p.extras.map(function (x) {
           var e = X[x]; if (!e) return '';
           return '<label class="check-opt"><input type="checkbox" name="extras" value="' + x + '"' + (draft.extras.indexOf(x) > -1 ? ' checked' : '') + '>' +
@@ -482,6 +489,7 @@
 
     updateCustomizer(false);
     openSheet($('#customSheet'));
+    body.scrollTop = 0;   // después de abrir: con la hoja cerrada el navegador ignora el scroll
   }
 
   function updateCustomizer(animate) {
@@ -501,8 +509,7 @@
   $('#customBody').addEventListener('change', function (e) {
     var t = e.target;
     if (!draft) return;
-    if (t.name === 'carnes') draft.carnes = +t.value;
-    else if (t.name === 'opcion') draft.opcion = t.value;
+    if (t.name === 'tamano') draft.tamano = t.value;
     else if (t.name === 'extras') {
       draft.extras = $$('input[name="extras"]:checked', this).map(function (i) { return i.value; });
     } else if (t.name === 'quitar') {
@@ -532,7 +539,7 @@
 
   function quickAdd(id) {
     var p = P[id];
-    if (p.opciones || (p.extras && p.extras.length) || (p.quitar && p.quitar.length) || p.carnes) return openCustomizer(id);
+    if (p.capas || p.tamanos || (p.extras && p.extras.length)) return openCustomizer(id);
     var it = newDraft(id);
     addItem(it);
     toast('Sumaste 1× ' + p.nombre, 'Ver pedido', openCart);
@@ -548,7 +555,7 @@
 
   function ticket(inner, code) {
     return '<div class="ticket-wrap"><div class="comanda">' +
-      '<div class="comanda-head"><img src="img/cut/logo-blue.png" alt="" width="348" height="137">' +
+      '<div class="comanda-head"><img src="img/brand/wordmark-blue.svg" alt="" width="950" height="425">' +
         '<div><b>Comanda' + (code ? ' <em>#' + esc(code) + '</em>' : '') + '</b><span>' + esc(nowLabel()) + ' · pedido web</span></div></div>' +
       inner + '</div></div>';
   }
@@ -568,7 +575,7 @@
               '<button type="button" data-step="1" aria-label="Una más">' + icon('plus') + '</button>' +
             '</div>' +
             '<span class="spacer"></span>' +
-            (P[it.id].capas || P[it.id].opciones || (P[it.id].extras || []).length ? '<button class="link-btn" type="button" data-edit>' + icon('edit') + 'Cambiar</button>' : '') +
+            (P[it.id].capas || P[it.id].tamanos || (P[it.id].extras || []).length ? '<button class="link-btn" type="button" data-edit>' + icon('edit') + 'Cambiar</button>' : '') +
             '<button class="link-btn" type="button" data-remove>' + icon('trash') + 'Quitar</button>' +
           '</div>' : '') +
       '</li>';
@@ -579,11 +586,10 @@
     var body = $('#cartBody'), foot = $('#cartFoot');
     if (!cart.length) {
       body.innerHTML = '<h2 class="sheet-title visually-hidden" id="cartTitle">Tu pedido</h2>' +
-        '<div class="empty"><div class="stack is-small" id="emptyStack" aria-hidden="true"></div>' +
+        '<div class="empty"><img class="empty-gato" src="img/brand/gato-cuerpo.svg" alt="" width="220" height="290">' +
         '<h3>Todavía está vacío</h3><p>Elegí algo de la carta o dejá que el asistente te arme el pedido.</p>' +
         '<div class="btns"><button class="btn btn-blue" type="button" data-open-chat>' + icon('chat') + 'Armar con el asistente</button>' +
         '<a class="btn btn-ghost" href="#carta" data-close>Ver la carta</a></div></div>';
-      renderStack($('#emptyStack'), [{ k: 'a', t: 'pan-abajo' }, { k: 'b', t: 'pan-arriba' }], false);
       foot.innerHTML = '';
       return;
     }
@@ -591,9 +597,8 @@
     body.innerHTML = '<h2 class="sheet-title" id="cartTitle">Tu pedido</h2>' +
       ticket(comandaItems(true) +
         '<div class="totals"><div class="grand"><span>Subtotal</span><span>' + money(t.sub) + '</span></div>' +
-        (C.entrega.delivery.activo ? '<div><span>Si es delivery</span><span>+' + money(C.entrega.delivery.costo) + '</span></div>' : '') +
-        '</div>') +
-      (C.preciosDeEjemplo ? '<p class="demo-note cart-body-note">Precios de ejemplo, a confirmar por el local.</p>' : '');
+        (C.entrega.delivery.activo ? '<div><span>Si es delivery</span><span>+' + envioLabel() + '</span></div>' : '') +
+        '</div>');
     foot.innerHTML = '<div class="cart-foot">' +
       '<button class="btn btn-blue btn-block" type="button" id="checkoutBtn"><span>Elegir entrega y pago</span><span>' + money(t.sub) + '</span></button>' +
       '<button class="btn btn-ghost btn-block" type="button" data-close>Seguir pidiendo</button></div>';
@@ -760,32 +765,46 @@
   function greet() {
     var s = openState();
     botSay('¡Hola! Soy el asistente de pedidos de <strong>Charly\'s</strong>. Te armo el pedido acá y lo mandás por WhatsApp con un toque.');
-    if (!s.open) botSay('Ahora estamos cerrados: abrimos ' + esc(s.when) + ' a ' + laHora(C.horario.abre) + '. Igual podés dejar el pedido armado y mandarlo.');
+    if (!s.open) botSay('Ahora estamos cerrados: abrimos ' + esc(s.when) + ' a ' + laHora(s.abre) + '. Igual podés dejar el pedido armado y mandarlo.');
   }
 
   function mainMenu(prompt) {
     if (prompt !== false) botSay(prompt || (cart.length ? '¿Qué más te preparamos?' : '¿Qué te preparamos?'));
-    var last = store.get('charlys.ultimo');
+    var last = store.get(LAST_KEY);
     var list = [];
     if (last && last.items && last.items.length && !cart.length) {
       list.push({ label: 'Repetir mi último pedido', icon: 'repeat', primary: true, onPick: repeatLast });
     }
-    list.push({ label: 'Burgers', onPick: function () { showCategory('burgers'); } });
-    list.push({ label: 'Pollo', onPick: function () { showCategory('pollo'); } });
-    list.push({ label: 'Papas y bebidas', onPick: function () { showCategory('extras'); } });
+    list.push({ label: 'Hamburguesas', onPick: function () { showCategory('burgers'); } });
+    list.push({ label: 'Lomitos', onPick: function () { showCategory('lomitos'); } });
+    list.push({ label: 'Papas', onPick: function () { showCategory('papas'); } });
+    list.push({ label: 'Bebida y potes', onPick: function () { showCategory('sueltos'); } });
     if (cart.length) list.push({ label: 'Terminar pedido', sub: money(totals().sub), primary: true, onPick: checkout });
     ask(list);
   }
 
   function showCategory(cat) {
     var items = C.productos.filter(function (p) { return p.categoria === cat; });
-    var intro = { burgers: 'Estas son las burgers. Todas con pan de papa y carne de 100 g:', pollo: 'Lo de pollo, extra crocante:', extras: 'Para acompañar:' }[cat];
+    var intro = {
+      burgers: 'Las hamburguesas. Todas con pan de papa y salen con papas:',
+      lomitos: 'Los lomitos, también con papas:',
+      papas: 'Porciones de papas:',
+      sueltos: 'Para sumar al pedido:'
+    }[cat];
     botSay(function (m) {
       m.classList.add('wide');
       m.innerHTML = '<p>' + intro + '</p><div class="pick-row">' + items.map(function (p) {
-        var img = p.foto ? '<span class="pick-img' + (p.fotoTipo === 'foto' ? ' is-photo' : '') + '"><img src="' + p.foto + '" alt="" loading="lazy"></span>' : '';
-        return '<button class="pick" type="button" data-pick="' + p.id + '">' + img + '<b>' + esc(p.nombre) + '</b><span>' + (p.carnes ? 'desde ' : '') + money(p.precio) + '</span></button>';
+        var img = p.flyer ? '<span class="pick-img"><img src="' + p.flyer.foto + '" alt="" loading="lazy"></span>'
+          : p.capas ? '<span class="pick-img is-drawn" data-drawn="' + p.id + '"></span>' : '';
+        return '<button class="pick" type="button" data-pick="' + p.id + '">' + img + '<b>' + esc(p.nombre) + '</b><span>' +
+          (p.tamanos ? 'desde ' + money(p.tamanos.simple) : money(p.precio)) + '</span></button>';
       }).join('') + '</div>';
+      $$('[data-drawn]', m).forEach(function (slot) {
+        var s = stackEl('is-small', slot.dataset.drawn);
+        s.setAttribute('aria-hidden', 'true');
+        slot.appendChild(s);
+        renderStack(s, layersFor(newDraft(slot.dataset.drawn)), false);
+      });
       $$('.pick', m).forEach(function (b) {
         b.addEventListener('click', function () {
           act();
@@ -803,44 +822,23 @@
     chat.draft = newDraft(id, preset);
     chat.presetQty = !!preset.qty;
     chat.live = null;
-    if (p.carnes && !preset.carnes) return askCarnes();
-    stepAfterCarnes(preset);
+    if (p.tamanos && !preset.tamano) return askSize();
+    stepAfterSize();
   }
 
-  function stepAfterCarnes(preset) {
+  function stepAfterSize() {
     var p = P[chat.draft.id];
-    if (p.opciones && !(preset && preset.opcion)) return askOpcion();
     if (p.extras && p.extras.length) return askExtras();
     if (p.quitar && p.quitar.length) return askQuitar();
     askQty();
   }
 
-  function askCarnes() {
+  function askSize() {
     var p = P[chat.draft.id];
     botSay('¿Cómo querés la <strong>' + esc(p.nombre) + '</strong>?');
-    var list = [];
-    for (var n = 1; n <= p.carnes.max; n++) {
-      (function (n) {
-        var price = p.precio + (n - p.carnes.incluidas) * C.carneExtra;
-        list.push({ label: sizeName(n).charAt(0).toUpperCase() + sizeName(n).slice(1), sub: money(price), onPick: function () { chat.draft.carnes = n; stepAfterCarnes(); } });
-      })(n);
-    }
-    ask(list);
-  }
-
-  function askOpcion() {
-    var p = P[chat.draft.id];
-    botSay('¿' + esc(p.opciones.titulo) + '?');
-    ask(p.opciones.valores.map(function (v) {
-      return { label: v, onPick: function () { chat.draft.opcion = v; stepAfterOpcion(); } };
+    ask(Object.keys(p.tamanos).map(function (s) {
+      return { label: sizeLabel(s), sub: money(p.tamanos[s]), onPick: function () { chat.draft.tamano = s; stepAfterSize(); } };
     }));
-  }
-
-  function stepAfterOpcion() {
-    var p = P[chat.draft.id];
-    if (p.extras && p.extras.length) return askExtras();
-    if (p.quitar && p.quitar.length) return askQuitar();
-    askQty();
   }
 
   function liveBubble(text) {
@@ -849,7 +847,7 @@
       if (P[chat.draft.id].capas) {
         var wrap = document.createElement('div');
         wrap.className = 'msg-stack';
-        var s = stackEl('is-small');
+        var s = stackEl('is-small', chat.draft.id);
         wrap.appendChild(s);
         m.appendChild(wrap);
         chat.live = s;
@@ -869,7 +867,7 @@
 
   function askExtras() {
     var p = P[chat.draft.id], d = chat.draft;
-    liveBubble((p.carnes ? 'Buenísimo, ' + esc(itemTitle(d)) + '. ' : '') + '¿Le sumamos algo? Tocá todo lo que quieras.');
+    liveBubble((p.tamanos ? 'Buenísimo, ' + esc(itemTitle(d)) + '. ' : '') + '¿Le sumamos algo? Tocá todo lo que quieras.');
     var list = p.extras.filter(function (x) { return X[x]; }).map(function (x) {
       return {
         label: X[x].nombre, sub: '+' + money(X[x].precio), toggle: true, pressed: d.extras.indexOf(x) > -1,
@@ -955,9 +953,10 @@
     botSay('¿Algo más?');
     ask([
       { label: 'Terminar pedido', sub: money(totals().sub), primary: true, onPick: checkout },
-      { label: 'Otra burger', onPick: function () { showCategory('burgers'); } },
-      { label: 'Pollo', onPick: function () { showCategory('pollo'); } },
-      { label: 'Papas o bebida', onPick: function () { showCategory('extras'); } }
+      { label: 'Otra hamburguesa', onPick: function () { showCategory('burgers'); } },
+      { label: 'Lomitos', onPick: function () { showCategory('lomitos'); } },
+      { label: 'Papas', onPick: function () { showCategory('papas'); } },
+      { label: 'Bebida y potes', onPick: function () { showCategory('sueltos'); } }
     ]);
   }
 
@@ -966,12 +965,12 @@
     var o = chat.order, t = totals(meta ? o.modo : null);
     var h = comandaItems(false) + '<div class="totals">';
     if (meta && o.modo === 'delivery') {
-      h += '<div><span>Subtotal</span><span>' + money(t.sub) + '</span></div><div><span>Envío</span><span>' + money(t.envio) + '</span></div>';
+      h += '<div><span>Subtotal</span><span>' + money(t.sub) + '</span></div><div><span>Envío</span><span>' + envioLabel() + '</span></div>';
     }
     h += '<div class="grand"><span>' + (meta ? 'Total' : 'Subtotal') + '</span><span>' + money(t.total) + '</span></div></div>';
     if (meta) {
       h += '<div class="comanda-meta">' +
-        '<div><b>Entrega:</b> ' + (o.modo === 'delivery' ? 'delivery a ' + esc(o.direccion) + (o.referencia ? ' (' + esc(o.referencia) + ')' : '') : 'retiro en el local') + '</div>' +
+        '<div><b>Entrega:</b> ' + (o.modo === 'delivery' ? 'delivery a ' + esc(o.direccion) + (o.referencia ? ' (' + esc(o.referencia) + ')' : '') : 'take away (retira en el local)') + '</div>' +
         '<div><b>Nombre:</b> ' + esc(o.nombre) + '</div>' +
         '<div><b>Pago:</b> ' + esc(payLine(t.total)) + '</div></div>' +
         '<p class="comanda-foot">¡gracias por pedir!</p>';
@@ -1010,8 +1009,8 @@
   function askMode() {
     botSay('¿Te lo llevamos o lo retirás?');
     var list = [];
-    if (C.entrega.delivery.activo) list.push({ label: 'Delivery', sub: '+' + money(C.entrega.delivery.costo), icon: 'moto', onPick: function () { chat.order.modo = 'delivery'; askAddress(); } });
-    if (C.entrega.retiro.activo) list.push({ label: 'Retiro en el local', icon: 'store', onPick: function () { chat.order.modo = 'retiro'; askName(); } });
+    if (C.entrega.delivery.activo) list.push({ label: 'Delivery', sub: '+' + envioLabel(), icon: 'moto', onPick: function () { chat.order.modo = 'delivery'; askAddress(); } });
+    if (C.entrega.retiro.activo) list.push({ label: 'Take away', icon: 'store', onPick: function () { chat.order.modo = 'retiro'; askName(); } });
     list.push({ label: 'Cambiar el pedido', onPick: openCartFromChat });
     ask(list);
   }
@@ -1118,7 +1117,7 @@
     if (!cart.length) { botSay('Tu pedido quedó vacío.'); return mainMenu(false); }
     var s = openState();
     sayTicket('<strong>¡Listo!</strong> Revisá que esté todo bien:', true,
-      !s.open ? '<p class="warn">Ahora estamos cerrados. Te respondemos apenas abramos, ' + esc(s.when) + ' a ' + laHora(C.horario.abre) + '.</p>' : '');
+      !s.open ? '<p class="warn">Ahora estamos cerrados. Te respondemos apenas abramos, ' + esc(s.when) + ' a ' + laHora(s.abre) + '.</p>' : '');
     var url = sendOrder(chat.order);
     prepareComandaImage();
     ask([
@@ -1157,7 +1156,7 @@
     L.push('');
     if (o.modo === 'delivery') {
       L.push('Subtotal: ' + money(t.sub));
-      L.push('Envío: ' + money(t.envio));
+      L.push('Envío: ' + envioLabel());
     }
     L.push('*Total: ' + money(t.total) + '*');
     L.push('');
@@ -1165,7 +1164,7 @@
       L.push('*Delivery* a: ' + o.direccion);
       if (o.referencia) L.push('Referencia: ' + o.referencia);
     } else {
-      L.push('*Retiro en el local*');
+      L.push('*Take away* (retira en el local)');
     }
     L.push('*Nombre:* ' + o.nombre);
     var pl = payLine(t.total);
@@ -1177,7 +1176,7 @@
     var url = sendOrder(chat.order);
     var o = chat.order;
     store.set('charlys.cliente', { nombre: o.nombre, direccion: o.direccion, referencia: o.referencia, modo: o.modo, pago: o.pago });
-    store.set('charlys.ultimo', { items: cart.map(cleanItem), fecha: Date.now() });
+    store.set(LAST_KEY, { items: cart.map(cleanItem), fecha: Date.now() });
     cart = [];
     saveCart(false);
     renderRepeat();
@@ -1279,20 +1278,20 @@
 
   function drawComanda(order) {
     var FONT = {
-      title: '900 30px "League Spartan", sans-serif',
-      item: '900 21px "League Spartan", sans-serif',
-      total: '900 30px "League Spartan", sans-serif',
+      title: '400 32px "Lilita One", sans-serif',
+      item: '400 22px "Lilita One", sans-serif',
+      total: '400 32px "Lilita One", sans-serif',
       body: '400 16px Archivo, sans-serif',
       bold: '800 16px Archivo, sans-serif',
       small: '700 14px Archivo, sans-serif',
-      hand: '400 30px "Caveat Brush", cursive'
+      hand: '400 24px Pacifico, cursive'
     };
-    var INK = '#1E4C8F', BLUE = '#2A5FAE', MUTED = '#4A5F80';
+    var INK = '#1446A9', BLUE = '#1446A9', MUTED = '#3A5794', YELLOW = '#FEB905';
     var S = 2, W = 540, X0 = 26, X1 = W - 26, CX0 = X0 + 26, CX1 = X1 - 26, CW = CX1 - CX0, Z = 9;
     var BAND = 18, TOP = BAND + 24;
     var t = totals(order.modo);
-    var items = cart.map(function (it) { return { title: (it.qty + '× ' + itemTitle(it)).toUpperCase(), price: money(unitPrice(it) * it.qty), lines: itemLines(it) }; });
-    var meta = [['Entrega', order.modo === 'delivery' ? 'delivery' : 'retiro en el local']];
+    var items = cart.map(function (it) { return { title: it.qty + '× ' + itemTitle(it), price: money(unitPrice(it) * it.qty), lines: itemLines(it) }; });
+    var meta = [['Entrega', order.modo === 'delivery' ? 'delivery' : 'take away']];
     if (order.modo === 'delivery') {
       meta.push(['Dirección', order.direccion || '']);
       if (order.referencia) meta.push(['Referencia', order.referencia]);
@@ -1307,13 +1306,13 @@
 
     function layout(m, logo) {
       var ops = [], y = TOP + Z + 22;
-      var logoW = 118, logoH = Math.round(logoW * 137 / 348);
+      var logoW = 124, logoH = Math.round(logoW * 425 / 950);
       if (logo) ops.push({ img: logo, x: CX0, y: y, w: logoW, h: logoH });
-      else ops.push({ t: "Charly's", f: '900 26px "League Spartan", sans-serif', c: INK, x: CX0, y: y + 32 });
+      else ops.push({ t: "Charly's", f: '400 28px "Lilita One", sans-serif', c: INK, x: CX0, y: y + 32 });
       var hx = CX0 + logoW + 16;
       ops.push({ t: 'COMANDA', f: FONT.title, c: INK, x: hx, y: y + 26 });
       ops.push({ t: (when ? when + ' · ' : '') + 'pedido web', f: FONT.small, c: MUTED, x: hx, y: y + 47 });
-      if (order.codigo) ops.push({ t: '#' + order.codigo, f: FONT.item, c: BLUE, x: CX1, y: y + 26, a: 'right' });
+      if (order.codigo) ops.push({ chip: '#' + order.codigo, f: FONT.item, x: CX1, y: y + 26 });
       y += logoH + 18;
       var notchY = y;
       ops.push({ dash: y }); y += 22;
@@ -1335,7 +1334,7 @@
         ops.push({ t: money(t.sub), f: FONT.body, c: MUTED, x: CX1, y: y + 14, a: 'right' });
         y += 26;
         ops.push({ t: 'Envío', f: FONT.body, c: MUTED, x: CX0, y: y + 14 });
-        ops.push({ t: money(t.envio), f: FONT.body, c: MUTED, x: CX1, y: y + 14, a: 'right' });
+        ops.push({ t: envioLabel(), f: FONT.body, c: MUTED, x: CX1, y: y + 14, a: 'right' });
         y += 30;
       }
       ops.push({ solid: y }); y += 12;
@@ -1393,9 +1392,16 @@
       [X0, X1].forEach(function (nx) { c.beginPath(); c.arc(nx, L.notchY, 11, 0, Math.PI * 2); c.fill(); });
       L.ops.forEach(function (op) {
         if (op.img) c.drawImage(op.img, op.x, op.y, op.w, op.h);
+        else if (op.chip) {
+          c.font = op.f;
+          var cw = c.measureText(op.chip).width + 14;
+          c.fillStyle = YELLOW; c.fillRect(op.x - cw, op.y - 22, cw, 30);
+          c.fillStyle = INK; c.textAlign = 'right'; c.textBaseline = 'alphabetic';
+          c.fillText(op.chip, op.x - 7, op.y);
+        }
         else if (op.dash != null) {
           c.save();
-          c.strokeStyle = op.light ? 'rgba(30,76,143,.28)' : 'rgba(30,76,143,.45)';
+          c.strokeStyle = op.light ? 'rgba(20,70,169,.28)' : 'rgba(20,70,169,.45)';
           c.lineWidth = 2; c.setLineDash([7, 6]);
           c.beginPath(); c.moveTo(CX0, op.dash); c.lineTo(CX1, op.dash); c.stroke();
           c.restore();
@@ -1413,18 +1419,18 @@
     }
 
     return fontsReady
-      .then(function () { return loadImage('img/cut/logo-blue.png').catch(function () { return null; }); })
+      .then(function () { return loadImage('img/brand/wordmark-blue.svg').catch(function () { return null; }); })
       .then(function (logo) { return render(logo).catch(function () { return render(null); }); });
   }
 
   function repeatLast() {
-    var last = store.get('charlys.ultimo');
+    var last = store.get(LAST_KEY);
     if (!last || !last.items || !last.items.length) { return mainMenu('No encontré un pedido anterior en este teléfono. ¿Arrancamos uno nuevo?'); }
     last.items.forEach(function (it) { if (P[it.id]) addItem(it); });
     sayTicket('Sumé tu último pedido:', false);
     var o = chat.order;
     if (o.modo && o.nombre && o.pago && (o.modo === 'retiro' || o.direccion)) {
-      var entrega = o.modo === 'delivery' ? 'delivery a ' + o.direccion : 'retiro en el local';
+      var entrega = o.modo === 'delivery' ? 'delivery a ' + o.direccion : 'take away';
       var pago = (C.pagos.filter(function (p) { return p.id === o.pago; })[0] || {}).nombre || '';
       botSay('¿Igual que la otra vez? <strong>' + esc(entrega) + '</strong>, a nombre de ' + esc(o.nombre) + ', pago con ' + esc(pago.toLowerCase()) + '.');
       ask([
@@ -1443,34 +1449,34 @@
     var words = { un: 1, una: 1, uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5 };
     var m = t.match(/\b(\d{1,2})\b/), qty = m ? +m[1] : null;
     if (!qty) Object.keys(words).some(function (w) { if (new RegExp('\\b' + w + '\\b').test(t)) { qty = words[w]; return true; } return false; });
-    var carnes = /cuadrupl/.test(t) ? 4 : /tripl/.test(t) ? 3 : /dobl/.test(t) ? 2 : /simpl/.test(t) ? 1 : null;
-    var keys = [['clasic', 'clasica'], ['cheese', 'cheese'], ['chees', 'cheese'], ['crunch', 'crunchy'], ['bbq', 'bbq'], ['barbacoa', 'bbq'],
-      ['chicken', 'chicken'], ['box', 'box'], ['papas cheddar', 'papas-cheddar'], ['papas con cheddar', 'papas-cheddar'], ['papa', 'papas'],
-      ['gaseosa', 'gaseosa'], ['coca', 'gaseosa'], ['sprite', 'gaseosa'], ['fanta', 'gaseosa'], ['agua', 'agua']];
+    var tamano = /dobl/.test(t) ? 'doble' : /simpl/.test(t) ? 'simple' : null;
+    /* el orden importa: lo más específico primero */
+    var keys = [['charlys lomo', 'lomo-charlys'], ['lomo charly', 'lomo-charlys'], ['lomo especial', 'lomo-especial'], ['lomo bbq', 'lomo-bbq'],
+      ['lomo barbacoa', 'lomo-bbq'], ['lomo', 'lomo'], ['lomito', 'lomo'],
+      ['papas cheddar', 'papas-cheddar'], ['papas con cheddar', 'papas-cheddar'], ['papas picante', 'papas-picantes'], ['picante', 'papas-picantes'],
+      ['papas', 'papas-simples'], ['porcion', 'papas-simples'],
+      ['pote de cheddar', 'pote-cheddar'], ['pote cheddar', 'pote-cheddar'], ['pote de barbacoa', 'pote-barbacoa'], ['pote barbacoa', 'pote-barbacoa'],
+      ['pote', 'pote-salsa'], ['pepsi', 'pepsi'], ['gaseosa', 'pepsi'], ['lata', 'pepsi'],
+      ['clasic', 'clasica'], ['crunch', 'crunchy'], ['bbq', 'bbq'], ['barbacoa', 'bbq'], ['criolla', 'criolla'], ['magnus', 'magnus'],
+      ['egg', 'egg'], ['queso', 'queso'], ['cheese', 'queso'], ['chees', 'queso']];
     for (var i = 0; i < keys.length; i++) {
       if (t.indexOf(keys[i][0]) > -1 && P[keys[i][1]]) {
-        var id = keys[i][1], preset = { qty: qty && qty <= 20 ? qty : null, carnes: P[id].carnes ? carnes : null };
-        if (P[id].opciones) {
-          var op = P[id].opciones.valores.filter(function (v) { return t.indexOf(norm(v).split(' ')[0]) > -1 && norm(v).split(' ')[0] !== 'con'; });
-          if (/zero/.test(t)) op = ['Coca-Cola Zero'];
-          if (op.length && P[id].opciones.valores.indexOf(op[0]) > -1) preset.opcion = op[0];
-        }
-        return startProduct(id, preset);
+        var id = keys[i][1];
+        return startProduct(id, { qty: qty && qty <= 20 ? qty : null, tamano: P[id].tamanos ? tamano : null });
       }
     }
-    if (/pollo/.test(t)) return showCategory('pollo');
     if (/hamburg|burger/.test(t)) return showCategory('burgers');
-    if (/bebida|tomar|gaseo/.test(t)) return showCategory('extras');
+    if (/bebida|tomar|gaseo/.test(t)) return showCategory('sueltos');
     if (/horari|abiert|abren|cierra|hora|cerrad/.test(t)) {
-      botSay('Abrimos de martes a domingo de ' + C.horario.abre + ' a ' + C.horario.cierra + '. Los lunes cerramos. Ahora: ' + esc(statusLine(openState()).toLowerCase()) + '.');
+      botSay('Abrimos ' + esc(hoursText()) + '. Los lunes cerramos. Ahora: ' + esc(statusLine(openState()).toLowerCase()) + '.');
       return restoreReplies();
     }
     if (/donde|direcci|ubicac|queda/.test(t)) {
-      botSay('Estamos en ' + esc(C.local.ciudad) + '. Podés retirar en el local o pedir delivery.');
+      botSay('Estamos en ' + esc(C.local.barrio) + ', ' + esc(C.local.ciudad) + '. Podés pedir delivery o retirar en el local (take away).');
       return restoreReplies();
     }
     if (/delivery|envio|envian|llevan/.test(t)) {
-      botSay('Sí, hacemos delivery en Famaillá. El envío cuesta ' + money(C.entrega.delivery.costo) + ' y lo elegís al terminar el pedido.');
+      botSay('Sí, hacemos delivery en Famaillá. El envío es de ' + esc(envioLabel()) + ' y lo elegís al terminar el pedido.');
       return restoreReplies();
     }
     if (/pago|pagar|transfer|mercado|efectivo|alias|tarjeta/.test(t)) {
@@ -1486,7 +1492,7 @@
     if (/gracias/.test(t)) { botSay('¡De nada! Acá estoy si necesitás algo más.'); return restoreReplies(); }
     if (/^(hola|buenas|buen dia|buenas noches|hey|que tal)/.test(t)) return mainMenu('¡Hola! ¿Qué te preparamos?');
     if (/menu|carta|que tienen|que hay|opciones/.test(t)) return mainMenu('Esto es lo que tenemos:');
-    botSay('No te entendí bien. Tocá una opción o escribí algo como <em>“2 crunchy dobles”</em>, <em>“papas”</em> o <em>“terminar”</em>.');
+    botSay('No te entendí bien. Tocá una opción o escribí algo como <em>“2 crunchy dobles”</em>, <em>“lomo especial”</em> o <em>“terminar”</em>.');
     restoreReplies();
   }
 
@@ -1515,7 +1521,7 @@
 
   /* ------------------------------------------------------------ repetir (hero) */
   function renderRepeat() {
-    var last = store.get('charlys.ultimo');
+    var last = store.get(LAST_KEY);
     var card = $('#repeatCard');
     if (!last || !last.items || !last.items.length) { card.hidden = true; return; }
     var items = last.items.filter(function (it) { return P[it.id]; });
@@ -1552,7 +1558,7 @@
     var t = e.target.closest('[data-open-chat]');
     if (t) { e.preventDefault(); openChat(); return; }
     var c = e.target.closest('[data-customize]');
-    if (c) { openCustomizer(c.dataset.customize); return; }
+    if (c) { openCustomizer(c.dataset.customize, { tamano: c.dataset.size }); return; }
     var a = e.target.closest('[data-add]');
     if (a) { quickAdd(a.dataset.add); return; }
   });
@@ -1602,8 +1608,8 @@
   renderCartUI(false);
   renderRepeat();
   $('#year').textContent = new Date().getFullYear();
-  $('#demoNote').hidden = !C.preciosDeEjemplo;
-  if (C.entrega.delivery.activo) $('#infoDelivery').textContent = 'Famaillá · ' + money(C.entrega.delivery.costo);
+  if (C.entrega.delivery.activo) $('#infoDelivery').textContent = 'Famaillá · ' + envioLabel();
+  $('#footerHours').textContent = hoursText().charAt(0).toUpperCase() + hoursText().slice(1);
   $('#infoPagos').textContent = C.pagos.map(function (p) { return p.nombre; }).join(', ').replace(/, ([^,]*)$/, ' o $1');
   setInterval(renderStatus, 60000);
 })();

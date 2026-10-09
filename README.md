@@ -1,8 +1,8 @@
 # Charly's · Burgers caseras en Famaillá
 
-Sitio web móvil de **Charly's**, hamburguesería y sandwichería de Famaillá (Tucumán). Muestra la carta, deja armar cada burger a gusto y toma el pedido con un asistente guiado. Al final, el pedido completo llega al WhatsApp del local.
+Sitio web móvil de **Charly's**, hamburguesería y sandwichería de Famaillá (Tucumán). Muestra la carta, deja armar cada burger o lomo a gusto y toma el pedido con un asistente guiado. Al final, el pedido completo llega al WhatsApp del local.
 
-El diseño sale de los flyers de Instagram de [@charlyburgerfama](https://www.instagram.com/charlyburgerfama/): tinta azul sobre papel, cuadrillé, títulos pesados y precios sobre trazos de pincel.
+El diseño es la identidad nueva de [@charlyburgerfama](https://www.instagram.com/charlyburgerfama/) (octubre 2026): el logo con la burger, el gato mascota, los flyers cobalto con el nombre en amarillo y la carta blanca con cuadrillé y precios en cajas azules.
 
 <p align="center">
   <img src="docs/celular-inicio.jpg" width="220" alt="Inicio en el celular: burger 3D, titular y botón Armá tu pedido">
@@ -22,14 +22,15 @@ El diseño sale de los flyers de Instagram de [@charlyburgerfama](https://www.in
 
 | | |
 |---|---|
-| **Burger 3D** | En el inicio hay un modelo 3D que gira solo y se puede girar con el dedo. Mientras carga se ve una foto fija. Si el teléfono tiene ahorro de datos, se queda con la foto. |
-| **Carta** | Fotos reales de los productos. Cada burger se arma: simple, doble, triple o cuádruple (carne extra), extras (cheddar, panceta, huevo, cebolla crunchy, salsa), ingredientes para sacar y una aclaración. |
-| **Armador** | Un dibujo de la burger que suma o quita capas a medida que elegís. |
+| **Burger 3D y mascota** | En el inicio, el gato de Charly's presenta un modelo 3D que gira solo y se puede girar con el dedo. Mientras carga se ve una foto fija. Si el teléfono tiene ahorro de datos, se queda con la foto. |
+| **Flyers** | Queso, BBQ y Crunchy como en Instagram, con sus fotos y los precios simple y doble listos para tocar. |
+| **Carta** | La carta del local con sus precios: hamburguesas (simple o doble), lomitos, porciones de papas y agregados. Cada caja de precio es un botón: abre el armador con ese tamaño elegido. |
+| **Armador** | Un dibujo de la burger o del lomo que suma o quita capas a medida que sumás agregados (carne y cheddar, huevo, cheddar en las papas, papas extra) o sacás ingredientes. |
 | **Carrito** | Tiene forma de comanda de cocina. Se guarda en el teléfono aunque cierres la página. |
-| **Asistente de pedidos** | Te guía con botones o entiende texto simple (*"2 crunchy dobles"*, *"papas"*, *"terminar"*). Pregunta delivery o retiro, dirección, nombre y forma de pago, y si pagás en efectivo calcula el vuelto. |
+| **Asistente de pedidos** | Te guía con botones o entiende texto simple (*"2 crunchy dobles"*, *"lomo especial"*, *"papas cheddar"*, *"terminar"*). Pregunta delivery o take away, dirección, nombre y forma de pago, y si pagás en efectivo calcula el vuelto. |
 | **Envío por WhatsApp** | Abre WhatsApp con el pedido ya escrito: productos, cambios, total, entrega y pago. Cada pedido lleva un código corto (por ejemplo, #4YVH). |
 | **Foto de la comanda** | Después de mandar el texto, el asistente arma una imagen de la comanda con el mismo código. En el celular se manda con el menú "Compartir" (se elige WhatsApp y el chat de Charly's); en la compu se copia para pegarla en WhatsApp Web o se descarga. WhatsApp no deja adjuntar imágenes desde un link, por eso va en un segundo paso. |
-| **Horario en vivo** | Muestra "Abierto ahora" o "Cerrado · abrimos…" según la hora de Tucumán. Si está cerrado, avisa, pero igual deja armar el pedido. |
+| **Horario en vivo** | Muestra "Abierto ahora" o "Cerrado · abrimos…" según la hora de Tucumán y el turno de cada día (martes a jueves hasta la 01:00, viernes a domingo hasta la 01:30). Si está cerrado, avisa, pero igual deja armar el pedido. |
 | **¿Lo de siempre?** | Repite el último pedido con un toque (se guarda en el teléfono del cliente). |
 
 ## Estructura
@@ -37,15 +38,15 @@ El diseño sale de los flyers de Instagram de [@charlyburgerfama](https://www.in
 ```
 index.html              página
 assets/
-  menu.js               ⭐ carta, precios, extras, envío, pagos, horario y WhatsApp (lo único que hay que editar)
+  menu.js               ⭐ carta, precios, agregados, envío, pagos, horarios por día y WhatsApp (lo único que hay que editar)
   app.js                carrito, armador, asistente, horario y envío del pedido
   styles.css            estilos (colores de marca en :root)
-  fonts/                tipografías alojadas en el sitio (Archivo, League Spartan, Caveat Brush)
+  fonts/                tipografías alojadas en el sitio (Archivo, Anton, Lilita One, Pacifico)
   3d/burger.glb         modelo 3D optimizado (1,7 MB)
 img/
-  cut/                  recortes de productos, logo en azul y blanco, póster del 3D
-  brush/                trazos de pincel sacados de los flyers
-  *.jpg, logo.png       fotos y logo originales
+  brand/                logo, gato, papas y lettering vectorizados de la marca (SVG), íconos del sitio
+  food/                 burgers recortadas de los flyers nuevos
+  cut/                  póster del 3D
 docs/                   capturas para este README
 PRODUCT.md, DESIGN.md   producto y sistema de diseño
 ```
@@ -67,9 +68,9 @@ Después abrí <http://localhost:8000>.
 
 ## Antes de publicar ✅
 
-1. **Precios reales:** en `assets/menu.js`, todo lo marcado `// EJEMPLO` es provisorio. Los confirmados son Chicken Burger $8.999, Box Pollo Frito $10.000 y Crunchy doble $7.200.
-2. **Envío y pagos:** poné el costo real del delivery (`entrega.delivery.costo`) y los alias reales de transferencia y Mercado Pago (`pagos`).
-3. **Sacar el aviso:** cambiá `preciosDeEjemplo: true` a `false` y desaparece el cartel "Precios de ejemplo".
+1. **Envío:** poné el costo real del delivery en `assets/menu.js` (`entrega.delivery.costo`) y cambiá `confirmado` a `true`; así desaparece el "(a confirmar)".
+2. **Pagos:** reemplazá los alias de ejemplo de transferencia y Mercado Pago (`pagos`).
+3. **Precios y horarios:** están cargados según la carta y la historia de horarios de octubre 2026. Si cambian, se editan en `menu.js` (`productos`, `agregados` y `horario`).
 4. **WhatsApp:** si cambia el número, editá `local.whatsapp` en `menu.js` y los links de `index.html` (buscá `5493813690561`).
 
 ## Publicar

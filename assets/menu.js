@@ -2,34 +2,37 @@
    CHARLY'S — CARTA, PRECIOS Y DATOS DEL LOCAL
    ---------------------------------------------------------------------
    Este es el único archivo que hace falta tocar para cambiar precios,
-   productos, extras, costo de envío, alias de pago u horario.
+   productos, agregados, costo de envío, alias de pago u horario.
 
-   IMPORTANTE: los precios marcados con "// EJEMPLO" son provisorios.
-   Cuando tengas todos los precios reales, cambiá `preciosDeEjemplo`
-   a false y desaparece el aviso de la web.
+   Precios tomados de la carta de Charly's (octubre 2026).
+   Lo marcado "// EJEMPLO" todavía es provisorio: costo del delivery
+   y alias de pago.
    ===================================================================== */
 window.CHARLYS = {
-  preciosDeEjemplo: true,
-
   local: {
     nombre: "Charly's",
     whatsapp: '5493813690561',          // formato internacional, sin + ni espacios
     whatsappVisible: '381 369-0561',
     instagram: 'charlyburgerfama',
+    barrio: 'B° San Nicolás',
     ciudad: 'Famaillá, Tucumán',
     zonaHoraria: 'America/Argentina/Tucuman'
   },
 
-  /* Días: 0 = domingo, 1 = lunes … 6 = sábado.
-     Si cierra después de medianoche, el turno sigue contando para el día que abrió. */
+  /* Turnos por día: 0 = domingo, 1 = lunes … 6 = sábado.
+     Si cierra después de medianoche, el turno sigue contando para el día que abrió.
+     Un día sin turno es un día cerrado. */
   horario: {
-    dias: [2, 3, 4, 5, 6, 0],
-    abre: '21:00',
-    cierra: '01:30'
+    2: ['21:30', '01:00'],
+    3: ['21:30', '01:00'],
+    4: ['21:30', '01:00'],
+    5: ['21:30', '01:30'],
+    6: ['21:30', '01:30'],
+    0: ['21:30', '01:30']
   },
 
   entrega: {
-    delivery: { activo: true, costo: 1500 },   // EJEMPLO: costo fijo del envío
+    delivery: { activo: true, costo: 1500, confirmado: false },   // EJEMPLO: costo fijo del envío
     retiro: { activo: true }
   },
 
@@ -39,101 +42,126 @@ window.CHARLYS = {
     { id: 'mercadopago', nombre: 'Mercado Pago', alias: 'charlys.mp.ej' }          // EJEMPLO: alias
   ],
 
-  /* Precio por carne extra: se suma por cada carne arriba de la que trae la burger.
-     Simple = 1 carne, Doble = 2, Triple = 3. */
-  carneExtra: 1200,                     // EJEMPLO (con Crunchy simple a $6.000 da la doble a $7.200)
-
-  extras: [
-    { id: 'cheddar', nombre: 'Cheddar extra', precio: 700, capa: 'cheddar' },          // EJEMPLO
-    { id: 'panceta', nombre: 'Panceta extra', precio: 900, capa: 'panceta' },          // EJEMPLO
-    { id: 'huevo', nombre: 'Huevo frito', precio: 600, capa: 'huevo' },                // EJEMPLO
-    { id: 'cebolla-crunchy', nombre: 'Cebolla crunchy', precio: 600, capa: 'cebolla' }, // EJEMPLO
-    { id: 'salsa', nombre: 'Salsa especial extra', precio: 400, capa: 'salsa' }         // EJEMPLO
+  /* Agregados que se suman al armar una burger o un lomo.
+     capa: qué se dibuja en el armador (una o varias capas). */
+  agregados: [
+    { id: 'carne', nombre: 'Carne y feta de cheddar', precio: 2500, capa: ['carne', 'cheddar'] },
+    { id: 'huevo', nombre: 'Huevo frito', precio: 1500, capa: 'huevo' },
+    { id: 'cheddar-papas', nombre: 'Cheddar en las papas', precio: 2500 },
+    { id: 'papas-extra', nombre: 'Papas extra', precio: 2500 }
   ],
 
-  /* banner: subtítulo sobre trazo de pincel (como en los flyers). nota: nota a mano con flecha.
-     capas: cómo se dibuja la burger en el armador, de abajo hacia arriba.
-     "CARNES" se reemplaza por las carnes elegidas (cada una con su queso).
-     quitar: ingredientes que el cliente puede sacar (id de capa + nombre). */
+  /* Todo sale con papas.
+     tamanos: precio por tamaño (simple = 1 carne, doble = 2).
+     capas: cómo se dibuja en el armador, de abajo hacia arriba.
+     "CARNES" se reemplaza por las carnes del tamaño elegido (cada una con su queso).
+     quitar: ingredientes que el cliente puede sacar (id de capa + nombre).
+     flyer: se muestra como flyer, con la foto recortada. */
   productos: [
     {
-      id: 'clasica', categoria: 'burgers', nombre: 'Clásica', foto: 'img/cut/clasica.webp',
-      descripcion: 'Pan de papa, carne de 100 g, queso tybo derretido, lechuga, tomate y huevo frito.',
-      precio: 6000,                     // EJEMPLO (simple)
-      carnes: { incluidas: 1, max: 4, queso: 'tybo' },
-      capas: ['lechuga', 'tomate', 'CARNES', 'huevo'],
-      quitar: [{ id: 'lechuga', nombre: 'lechuga' }, { id: 'tomate', nombre: 'tomate' }, { id: 'huevo', nombre: 'huevo' }],
-      extras: ['cheddar', 'panceta', 'huevo', 'salsa']
-    },
-    {
-      id: 'cheese', categoria: 'burgers', nombre: 'Cheese', foto: 'img/cut/cheese.webp',
-      descripcion: 'Pan de papa, carne de 100 g y queso cheddar derretido. Simple y perfecta.',
-      precio: 5500,                     // EJEMPLO (simple)
-      carnes: { incluidas: 1, max: 4, queso: 'cheddar' },
+      id: 'queso', categoria: 'burgers', nombre: "Charly's con Queso", corto: 'Con Queso',
+      descripcion: 'Pan de papa, carne y cheddar.',
+      tamanos: { simple: 7700, doble: 8500 }, queso: 'cheddar',
       capas: ['CARNES'],
       quitar: [],
-      extras: ['cheddar', 'panceta', 'huevo', 'cebolla-crunchy', 'salsa']
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra'],
+      flyer: { titulo: 'Queso', foto: 'img/food/queso.webp', alto: 843 }
     },
     {
-      id: 'crunchy', categoria: 'burgers', nombre: 'Crunchy', foto: 'img/cut/crunchy.webp',
-      descripcion: 'Pan de papa, carne de 100 g, cheddar derretido, panceta crujiente, cebolla crunchy y salsa especial.',
-      precio: 6000,                     // EJEMPLO (simple). Doble confirmada: $7.200
-      carnes: { incluidas: 1, max: 4, queso: 'cheddar' },
-      capas: ['salsa', 'CARNES', 'panceta', 'cebolla'],
-      quitar: [{ id: 'panceta', nombre: 'panceta' }, { id: 'cebolla', nombre: 'cebolla crunchy' }, { id: 'salsa', nombre: 'salsa' }],
-      extras: ['cheddar', 'panceta', 'huevo', 'cebolla-crunchy', 'salsa'],
-      destaque: true,                   // se muestra grande, en el panel azul
-      banner: 'Cheddar, panceta y cebolla crunchy',
-      nota: '¿La probaste doble?'
-    },
-    {
-      id: 'bbq', categoria: 'burgers', nombre: 'BBQ', foto: 'img/cut/bbq.webp',
-      descripcion: 'Pan de papa, carne de 100 g, cheddar derretido, panceta crujiente, cebolla caramelizada y barbacoa especial.',
-      precio: 6200,                     // EJEMPLO (simple)
-      carnes: { incluidas: 1, max: 4, queso: 'cheddar' },
+      id: 'bbq', categoria: 'burgers', nombre: "Charly's BBQ", corto: 'BBQ',
+      descripcion: 'Pan de papa, carne, cheddar, cebolla caramelizada, salsa barbacoa y bacon.',
+      tamanos: { simple: 8500, doble: 9500 }, queso: 'cheddar',
       capas: ['barbacoa', 'caramelizada', 'CARNES', 'panceta'],
-      quitar: [{ id: 'panceta', nombre: 'panceta' }, { id: 'caramelizada', nombre: 'cebolla caramelizada' }, { id: 'barbacoa', nombre: 'barbacoa' }],
-      extras: ['cheddar', 'panceta', 'huevo', 'cebolla-crunchy']
+      quitar: [{ id: 'panceta', nombre: 'bacon' }, { id: 'caramelizada', nombre: 'cebolla caramelizada' }, { id: 'barbacoa', nombre: 'barbacoa' }],
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra'],
+      flyer: { titulo: 'BBQ', foto: 'img/food/bbq.webp', alto: 929 }
     },
     {
-      id: 'chicken', categoria: 'pollo', nombre: 'Chicken Burger', foto: 'img/cut/chicken.webp', fotoTipo: 'foto',
-      descripcion: 'Pollo frito extra crocante, salsa especial de la casa, cheddar derretido y pan suave tostadito. Viene con papas.',
-      precio: 8999,                     // confirmado
-      capas: ['salsa', 'pollo', 'cheddar'],
-      quitar: [{ id: 'salsa', nombre: 'salsa' }, { id: 'cheddar', nombre: 'cheddar' }],
-      extras: ['cheddar', 'panceta', 'salsa'],
-      banner: 'Con papas y salsa especial',
-      precioEtiqueta: 'por solo',
-      nota: '¡La combi perfecta!'
+      id: 'crunchy', categoria: 'burgers', nombre: "Charly's Crunchy", corto: 'Crunchy',
+      descripcion: 'Pan de papa, carne, cheddar, cebolla crunchy, salsa especial y bacon.',
+      tamanos: { simple: 8500, doble: 9500 }, queso: 'cheddar',
+      capas: ['salsa', 'CARNES', 'panceta', 'cebolla'],
+      quitar: [{ id: 'panceta', nombre: 'bacon' }, { id: 'cebolla', nombre: 'cebolla crunchy' }, { id: 'salsa', nombre: 'salsa especial' }],
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra'],
+      flyer: { titulo: 'Crunchy', foto: 'img/food/crunchy.webp', alto: 1014 }
     },
     {
-      id: 'box', categoria: 'pollo', nombre: 'Box Pollo Frito', foto: 'img/cut/box.webp', fotoTipo: 'foto',
-      descripcion: 'Pollo frito extra crocante, papas doradas y nuestra salsa especial. Ideal para compartir (¡o no!).',
-      precio: 10000,                    // confirmado
-      extras: ['salsa'],
-      banner: 'Papas y salsa especial',
-      precioEtiqueta: 'a solo',
-      limitado: 'Unidades limitadas por noche'
+      id: 'criolla', categoria: 'burgers', nombre: "Charly's Criolla", corto: 'Criolla',
+      descripcion: 'Pan de papa, carne, queso tybo y salsa criolla.',
+      tamanos: { simple: 8500, doble: 9500 }, queso: 'tybo',
+      capas: ['CARNES', 'criolla'],
+      quitar: [{ id: 'criolla', nombre: 'salsa criolla' }],
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra']
+    },
+    {
+      id: 'clasica', categoria: 'burgers', nombre: "Charly's Clásica", corto: 'Clásica',
+      descripcion: 'Pan de papa, carne, queso tybo, lechuga y tomate, mayonesa y huevo frito.',
+      tamanos: { simple: 9500, doble: 10000 }, queso: 'tybo',
+      capas: ['mayonesa', 'lechuga', 'tomate', 'CARNES', 'huevo'],
+      quitar: [{ id: 'lechuga', nombre: 'lechuga' }, { id: 'tomate', nombre: 'tomate' }, { id: 'mayonesa', nombre: 'mayonesa' }, { id: 'huevo', nombre: 'huevo' }],
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra']
+    },
+    {
+      id: 'magnus', categoria: 'burgers', nombre: "Charly's Magnus", corto: 'Magnus',
+      descripcion: 'Pan de papa, carne, cheddar, ketchup, pepinillos y cebolla morada.',
+      tamanos: { simple: 8500, doble: 9500 }, queso: 'cheddar',
+      capas: ['ketchup', 'CARNES', 'pepinillos', 'morada'],
+      quitar: [{ id: 'ketchup', nombre: 'ketchup' }, { id: 'pepinillos', nombre: 'pepinillos' }, { id: 'morada', nombre: 'cebolla morada' }],
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra']
+    },
+    {
+      id: 'egg', categoria: 'burgers', nombre: "Charly's Egg", corto: 'Egg',
+      descripcion: 'Pan de papa, carne, cheddar, huevo frito y mucho bacon.',
+      tamanos: { simple: 8500, doble: 9500 }, queso: 'cheddar',
+      capas: ['CARNES', 'panceta', 'panceta', 'huevo'],
+      quitar: [{ id: 'huevo', nombre: 'huevo' }, { id: 'panceta', nombre: 'bacon' }],
+      extras: ['carne', 'huevo', 'cheddar-papas', 'papas-extra']
     },
 
-    /* Papas y bebidas */
+    /* Lomitos */
     {
-      id: 'papas', categoria: 'extras', nombre: 'Papas fritas', descripcion: 'Porción de papas doradas.',
-      precio: 3000                      // EJEMPLO
+      id: 'lomo', categoria: 'lomitos', nombre: 'Lomo común',
+      descripcion: 'Pan, lomito, lechuga y tomate, mayonesa y mostaza.',
+      precio: 9500, pan: 'lomo',
+      capas: ['mayonesa', 'lechuga', 'tomate', 'lomo', 'mostaza'],
+      quitar: [{ id: 'lechuga', nombre: 'lechuga' }, { id: 'tomate', nombre: 'tomate' }, { id: 'mayonesa', nombre: 'mayonesa' }, { id: 'mostaza', nombre: 'mostaza' }],
+      extras: ['huevo', 'cheddar-papas', 'papas-extra']
     },
     {
-      id: 'papas-cheddar', categoria: 'extras', nombre: 'Papas cheddar y panceta', descripcion: 'Papas con cheddar derretido y panceta crujiente.',
-      precio: 4500                      // EJEMPLO
+      id: 'lomo-especial', categoria: 'lomitos', nombre: 'Lomo especial',
+      descripcion: 'Pan, lomito, huevo, jamón y queso, lechuga y tomate, mayonesa y mostaza.',
+      precio: 10000, pan: 'lomo',
+      capas: ['mayonesa', 'lechuga', 'tomate', 'lomo', 'jamon', 'tybo', 'huevo', 'mostaza'],
+      quitar: [{ id: 'huevo', nombre: 'huevo' }, { id: 'jamon', nombre: 'jamón' }, { id: 'tybo', nombre: 'queso' }, { id: 'lechuga', nombre: 'lechuga' }, { id: 'tomate', nombre: 'tomate' }, { id: 'mayonesa', nombre: 'mayonesa' }, { id: 'mostaza', nombre: 'mostaza' }],
+      extras: ['huevo', 'cheddar-papas', 'papas-extra']
     },
     {
-      id: 'gaseosa', categoria: 'extras', nombre: 'Gaseosa 500 ml', descripcion: 'Fría, para acompañar.',
-      precio: 1800,                     // EJEMPLO
-      opciones: { titulo: 'Sabor', valores: ['Coca-Cola', 'Coca-Cola Zero', 'Sprite', 'Fanta'] }
+      id: 'lomo-bbq', categoria: 'lomitos', nombre: 'Lomo BBQ',
+      descripcion: 'Pan, lomito, cebolla caramelizada, salsa barbacoa y mucho queso cheddar.',
+      precio: 10500, pan: 'lomo',
+      capas: ['barbacoa', 'lomo', 'cheddar', 'cheddar', 'caramelizada'],
+      quitar: [{ id: 'caramelizada', nombre: 'cebolla caramelizada' }, { id: 'barbacoa', nombre: 'barbacoa' }],
+      extras: ['huevo', 'cheddar-papas', 'papas-extra']
     },
     {
-      id: 'agua', categoria: 'extras', nombre: 'Agua 500 ml', descripcion: 'Con o sin gas.',
-      precio: 1300,                     // EJEMPLO
-      opciones: { titulo: 'Tipo', valores: ['Sin gas', 'Con gas'] }
-    }
+      id: 'lomo-charlys', categoria: 'lomitos', nombre: "Charly's Lomo",
+      descripcion: 'Pan, doble lomito, doble huevo, doble jamón y queso, y salsa especial.',
+      precio: 14000, pan: 'lomo',
+      capas: ['salsa', 'lomo', 'jamon', 'tybo', 'lomo', 'jamon', 'tybo', 'huevo', 'huevo'],
+      quitar: [{ id: 'huevo', nombre: 'huevo' }, { id: 'jamon', nombre: 'jamón' }, { id: 'salsa', nombre: 'salsa especial' }],
+      extras: ['huevo', 'cheddar-papas', 'papas-extra'],
+      destaque: 'El más completo'
+    },
+
+    /* Porciones de papas */
+    { id: 'papas-simples', categoria: 'papas', nombre: 'Papas simples', precio: 7500 },
+    { id: 'papas-cheddar', categoria: 'papas', nombre: 'Papas cheddar', precio: 8500 },
+    { id: 'papas-picantes', categoria: 'papas', nombre: 'Papas picantes', precio: 9000 },
+
+    /* Para sumar al pedido */
+    { id: 'pote-salsa', categoria: 'sueltos', nombre: 'Pote de salsa especial', precio: 1500 },
+    { id: 'pote-cheddar', categoria: 'sueltos', nombre: 'Pote de cheddar', precio: 2500 },
+    { id: 'pote-barbacoa', categoria: 'sueltos', nombre: 'Pote de barbacoa', precio: 1500 },
+    { id: 'pepsi', categoria: 'sueltos', nombre: 'Pepsi lata', precio: 2000 }
   ]
 };
